@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+var instance *Request
+
 type Options struct {
 	Url string
 }
@@ -21,6 +23,16 @@ func (r *Request) Get(o *Options) {
 
 func Get(o *Options) {
 
+}
+
+// ********** Private methods/functions **********
+// REMARKS: Used internally by non-instance methods
+func getInstance() *Request {
+	if instance == nil {
+		instance = New()
+	}
+
+	return instance
 }
 
 func (r *Request) doRequest(m string, o *Options) (*http.Response, []byte, error) {
