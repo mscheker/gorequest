@@ -17,12 +17,24 @@ type Request struct {
 	Timeout time.Duration
 }
 
-func (r *Request) Get(o *Options) {
+func New() *Request {
+	r := new(Request)
 
+	r.Timeout = 30 * time.Second
+
+	r.client = &http.Client{
+		Timeout: r.Timeout,
+	}
+
+	return r
 }
 
-func Get(o *Options) {
+func (r *Request) Get(o *Options) (*http.Response, []byte, error) {
+	return r.doRequest("GET", o)
+}
 
+func Get(o *Options) (*http.Response, []byte, error) {
+	return getInstance().doRequest("GET", o)
 }
 
 // ********** Private methods/functions **********
