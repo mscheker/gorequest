@@ -49,6 +49,14 @@ func New() *Request {
 	return r
 }
 
+func NewRequest(url string) (*http.Response, []byte, error) {
+	o := &Option{
+		Url: url,
+	}
+
+	return Get(o)
+}
+
 func (r *Request) Get(o *Option) (*http.Response, []byte, error) {
 	return r.doRequest("GET", o)
 }
