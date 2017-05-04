@@ -1,20 +1,40 @@
 package request
 
 import (
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"regexp"
+	"strings"
 	"time"
 )
 
 var instance *Request
 
+type auth struct {
+	Username string
+	Password string
+	Bearer   string
+}
+
 type Options struct {
-	Url string
+	Url     string
+	Headers map[string]string
+	Auth    *auth
 }
 
 type Request struct {
 	client  *http.Client
 	Timeout time.Duration
+}
+
+func NewAuth(username, password, bearer string) *auth {
+	return &auth{
+		Username: username,
+		Password: password,
+		Bearer:   bearer,
+	}
 }
 
 func New() *Request {
@@ -47,11 +67,52 @@ func getInstance() *Request {
 	return instance
 }
 
+// REMARKS: The user/pwd can be provided in the URL when doing Basic Authentication (RFC 1738)
+func splitUserNamePassword(u string) (usr, pwd string, err error) {
+	reg, err := regexp.Compile("^(http|https|mailto)://")
+
+	if err != nil {
+		return "", "", err
+	}
+
+	s := reg.ReplaceAllString(u, "")
+
+	if reg, err := regexp.Compile("@(.+)"); err != nil {
+		return "", "", err
+	} else {
+		v := reg.ReplaceAllString(s, "")
+
+		c := strings.Split(v, ":")
+
+		if len(c) < 1 {
+			return "", "", errors.New("No credentials found in URI")
+		}
+
+		return c[0], c[1], nil
+	}
+}
+
+// REMARKS: The Body in the http.Response will be closed when returning a response to the caller
 func (r *Request) doRequest(m string, o *Options) (*http.Response, []byte, error) {
 	req, err := http.NewRequest(m, o.Url, nil)
 
 	if err != nil {
 		panic(err)
+	}
+
+	if o.Auth != nil {
+		if o.Auth.Bearer != "" {
+			req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", o.Auth.Bearer))
+		} else if o.Auth.Username != "" && o.Auth.Password != "" {
+			req.SetBasicAuth(o.Auth.Username, o.Auth.Password)
+		}
+	} else if usr, pwd, err := splitUserNamePassword(o.Url); err != nil {
+		// TODO: Should we panic if an error is returned or silently ignore this - maybe give some warning ?
+		//panic(err)
+	} else {
+		if usr != "" && pwd != "" {
+			req.SetBasicAuth(usr, pwd)
+		}
 	}
 
 	resp, err := r.client.Do(req)
