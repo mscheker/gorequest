@@ -18,7 +18,7 @@ type auth struct {
 	Bearer   string
 }
 
-type Options struct {
+type Option struct {
 	Url     string
 	Headers map[string]string
 	Auth    *auth
@@ -49,11 +49,11 @@ func New() *Request {
 	return r
 }
 
-func (r *Request) Get(o *Options) (*http.Response, []byte, error) {
+func (r *Request) Get(o *Option) (*http.Response, []byte, error) {
 	return r.doRequest("GET", o)
 }
 
-func Get(o *Options) (*http.Response, []byte, error) {
+func Get(o *Option) (*http.Response, []byte, error) {
 	return getInstance().doRequest("GET", o)
 }
 
@@ -93,7 +93,7 @@ func splitUserNamePassword(u string) (usr, pwd string, err error) {
 }
 
 // REMARKS: The Body in the http.Response will be closed when returning a response to the caller
-func (r *Request) doRequest(m string, o *Options) (*http.Response, []byte, error) {
+func (r *Request) doRequest(m string, o *Option) (*http.Response, []byte, error) {
 	req, err := http.NewRequest(m, o.Url, nil)
 
 	if err != nil {
