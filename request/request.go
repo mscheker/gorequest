@@ -65,6 +65,14 @@ func Get(o *Option) (*http.Response, []byte, error) {
 	return getInstance().doRequest("GET", o)
 }
 
+func (r *Request) Delete(o *Option) (*http.Response, []byte, error) {
+	return r.doRequest("DELETE", o)
+}
+
+func Delete(o *Option) (*http.Response, []byte, error) {
+	return getInstance().doRequest("DELETE", o)
+}
+
 // ********** Private methods/functions **********
 // REMARKS: Used internally by non-instance methods
 func getInstance() *Request {
