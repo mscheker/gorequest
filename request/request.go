@@ -1,10 +1,13 @@
 package request
 
 import (
+	"bytes"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"regexp"
 	"strings"
 	"time"
@@ -22,6 +25,7 @@ type Option struct {
 	Url     string
 	Headers map[string]string
 	Auth    *auth
+	Body    interface{}
 }
 
 type Request struct {
@@ -55,6 +59,14 @@ func NewRequest(url string) (*http.Response, []byte, error) {
 	}
 
 	return Get(o)
+}
+
+func (r *Request) Post(o *Option) (*http.Response, []byte, error) {
+	return r.doRequest("POST", o)
+}
+
+func Post(o *Option) (*http.Response, []byte, error) {
+	return getInstance().doRequest("POST", o)
 }
 
 func (r *Request) Get(o *Option) (*http.Response, []byte, error) {
@@ -108,9 +120,45 @@ func splitUserNamePassword(u string) (usr, pwd string, err error) {
 	}
 }
 
+// REMARKS: Returns a buffer with the body of the request - Content-Type header is set accordingly
+func getRequestBody(o *Option) *bytes.Buffer {
+	b := reflect.Indirect(reflect.ValueOf(o.Body))
+	buff := make([]byte, 0)
+	body := new(bytes.Buffer)
+	contentType := ""
+
+	switch b.Kind() {
+	case reflect.String:
+		// REMARKS: This takes care of a JSON serialized string
+		buff = []byte(b.String())
+		body = bytes.NewBuffer(buff)
+
+		// TODO: Need to set headers accordingly
+		contentType = "text/plain"
+		break
+	case reflect.Struct:
+		// TODO: Check the JSON property and use json.Marshal to serialize the struct
+
+		// TODO: Test to ensure that we can safely serialize the body
+		if err := binary.Write(body, binary.BigEndian, b); err != nil {
+			panic(err)
+		}
+		break
+	}
+
+	// TODO: Change headers property to be a struct ?
+	o.Headers["Content-Type"] = contentType
+
+	return body
+}
+
 // REMARKS: The Body in the http.Response will be closed when returning a response to the caller
 func (r *Request) doRequest(m string, o *Option) (*http.Response, []byte, error) {
-	req, err := http.NewRequest(m, o.Url, nil)
+	if o.Headers == nil {
+		o.Headers = make(map[string]string)
+	}
+	body := getRequestBody(o)
+	req, err := http.NewRequest(m, o.Url, body)
 
 	if err != nil {
 		panic(err)
@@ -131,6 +179,13 @@ func (r *Request) doRequest(m string, o *Option) (*http.Response, []byte, error)
 		}
 	}
 
+	// TODO: Validate headers against known list of headers ?
+	// TODO: Ensure headers are only set once
+	// TODO: If JSON property set, add Content-Type: application/json if not already set in o.Headers
+	for k, v := range o.Headers {
+		req.Header.Add(k, v)
+	}
+
 	resp, err := r.client.Do(req)
 
 	defer resp.Body.Close()
@@ -139,11 +194,9 @@ func (r *Request) doRequest(m string, o *Option) (*http.Response, []byte, error)
 		return resp, nil, err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
-
-	if err != nil {
+	if body, err := ioutil.ReadAll(resp.Body); err != nil {
 		return resp, nil, err
+	} else {
+		return resp, body, nil
 	}
-
-	return resp, body, nil
 }
