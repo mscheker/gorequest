@@ -66,7 +66,7 @@ func (r *Request) Post(o *Option) (*http.Response, []byte, error) {
 }
 
 func Post(o *Option) (*http.Response, []byte, error) {
-	return getInstance().doRequest("POST", o)
+	return getInstance().Post(o)
 }
 
 func (r *Request) Put(o *Option) (*http.Response, []byte, error) {
@@ -74,7 +74,7 @@ func (r *Request) Put(o *Option) (*http.Response, []byte, error) {
 }
 
 func Put(o *Option) (*http.Response, []byte, error) {
-	return getInstance().doRequest("PUT", o)
+	return getInstance().Put(o)
 }
 
 func (r *Request) Get(o *Option) (*http.Response, []byte, error) {
@@ -82,15 +82,18 @@ func (r *Request) Get(o *Option) (*http.Response, []byte, error) {
 }
 
 func Get(o *Option) (*http.Response, []byte, error) {
-	return getInstance().doRequest("GET", o)
+	return getInstance().Get(o)
 }
 
 func (r *Request) Delete(o *Option) (*http.Response, []byte, error) {
+	// REMARKS: Ignore Body - RFC2616
+	o.Body = nil
+
 	return r.doRequest("DELETE", o)
 }
 
 func Delete(o *Option) (*http.Response, []byte, error) {
-	return getInstance().doRequest("DELETE", o)
+	return getInstance().Delete(o)
 }
 
 // ********** Private methods/functions **********
