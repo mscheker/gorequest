@@ -49,6 +49,9 @@ func New() *Request {
 
 	r.Timeout = 30 * time.Second
 
+	// TODO: Set Transport for TLS
+	// TODO: Allow Transport to be overriden by user
+
 	r.client = &http.Client{
 		Timeout: r.Timeout,
 	}
@@ -222,7 +225,6 @@ func (r *Request) doRequest(m string, o *Option) (*http.Response, []byte, error)
 
 	// TODO: Validate headers against known list of headers ?
 	// TODO: Ensure headers are only set once
-	// TODO: If JSON property set, add Content-Type: application/json if not already set in o.Headers
 	for k, v := range o.Headers {
 		req.Header.Add(k, v)
 	}
