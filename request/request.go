@@ -3,6 +3,7 @@ package request
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -21,11 +22,13 @@ type auth struct {
 	Bearer   string
 }
 
+// TODO: Add constructor for Options ?
 type Option struct {
 	Url     string
 	Headers map[string]string
 	Auth    *auth
 	Body    interface{}
+	JSON    interface{}
 }
 
 type Request struct {
@@ -141,7 +144,16 @@ func splitUserNamePassword(u string) (usr, pwd string, err error) {
 
 // REMARKS: Returns a buffer with the body of the request - Content-Type header is set accordingly
 func getRequestBody(o *Option) *bytes.Buffer {
+	j := reflect.Indirect(reflect.ValueOf(o.JSON))
+
+	if j.Kind() == reflect.String || j.Kind() == reflect.Struct {
+		o.Body = o.JSON
+		o.JSON = true
+		j = reflect.Indirect(reflect.ValueOf(o.JSON))
+	}
+
 	b := reflect.Indirect(reflect.ValueOf(o.Body))
+
 	buff := make([]byte, 0)
 	body := new(bytes.Buffer)
 	contentType := ""
@@ -152,14 +164,24 @@ func getRequestBody(o *Option) *bytes.Buffer {
 		buff = []byte(b.String())
 		body = bytes.NewBuffer(buff)
 
-		// TODO: Need to set headers accordingly
-		contentType = "text/plain"
+		// TODO: Need to set headers accordingly (Other headers other than the two below ?
+		if j.Bool() {
+			contentType = "application/json"
+		} else {
+			contentType = "text/plain"
+		}
 		break
 	case reflect.Struct:
-		// TODO: Check the JSON property and use json.Marshal to serialize the struct
+		if j.Bool() {
+			if buff, err := json.Marshal(b.Interface()); err != nil {
+				panic(err)
+			} else {
+				body = bytes.NewBuffer(buff)
+			}
 
-		// TODO: Test to ensure that we can safely serialize the body
-		if err := binary.Write(body, binary.BigEndian, b); err != nil {
+			contentType = "application/json"
+		} else if err := binary.Write(body, binary.BigEndian, b); err != nil {
+			// TODO: Test to ensure that we can safely serialize the body
 			panic(err)
 		}
 		break
