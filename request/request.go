@@ -69,6 +69,14 @@ func Post(o *Option) (*http.Response, []byte, error) {
 	return getInstance().doRequest("POST", o)
 }
 
+func (r *Request) Put(o *Option) (*http.Response, []byte, error) {
+	return r.doRequest("PUT", o)
+}
+
+func Put(o *Option) (*http.Response, []byte, error) {
+	return getInstance().doRequest("PUT", o)
+}
+
 func (r *Request) Get(o *Option) (*http.Response, []byte, error) {
 	return r.doRequest("GET", o)
 }
