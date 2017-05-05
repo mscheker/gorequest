@@ -78,6 +78,14 @@ func Put(o *Option) (*http.Response, []byte, error) {
 }
 
 func (r *Request) Get(o *Option) (*http.Response, []byte, error) {
+	// REMARKS: For the time being, the Body of a GET request will be ignored. For more information, read below or refer to the HTTP Specification.
+	// REMARKS: There is a lot of ambiguity to suggest that most servers won't inspect the body of a GET request. Clients like Postman disable the Body tab when performing a GET request.
+	// Ref: https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html.
+	// Section 4.3: A message-body MUST NOT be included in a request if the specification of the request method (section 5.1.1) does not allow sending an entity-body in requests.
+	// Section 5.2: The exact resource identified by an Internet request is determined by examining both the Request-URI and the Host header field.
+	// Section 9.3: The GET method means retrieve whatever information (in the form of an entity) is identified by the Request-URI.
+	o.Body = nil
+
 	return r.doRequest("GET", o)
 }
 
