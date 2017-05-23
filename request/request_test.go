@@ -73,4 +73,12 @@ func TestSplitUserNamePasswordNoCredentialsFound(t *testing.T) {
 	assert.Empty(t, usr, "Should be empty")
 	assert.Empty(t, pwd, "Should be empty")
 	assert.EqualError(t, err, "No credentials found in URI")
+
+	url = "https://@mysite.com"
+
+	u, p, e := splitUserNamePassword(url)
+
+	assert.Empty(t, u, "Should be empty")
+	assert.Empty(t, p, "Should be empty")
+	assert.EqualError(t, e, "No credentials found in URI")
 }
