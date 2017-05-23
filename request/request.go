@@ -132,6 +132,10 @@ func splitUserNamePassword(u string) (usr, pwd string, err error) {
 
 	s := reg.ReplaceAllString(u, "")
 
+	if !strings.Contains(s, "@") {
+		return "", "", errors.New("No credentials found in URI")
+	}
+
 	if reg, err := regexp.Compile("@(.+)"); err != nil {
 		return "", "", err
 	} else {
