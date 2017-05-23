@@ -143,7 +143,7 @@ func splitUserNamePassword(u string) (usr, pwd string, err error) {
 
 		c := strings.Split(v, ":")
 
-		if len(c) < 1 {
+		if len(c) < 2 {
 			return "", "", errors.New("No credentials found in URI")
 		}
 
