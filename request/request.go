@@ -32,8 +32,7 @@ type Option struct {
 }
 
 type Request struct {
-	client  *http.Client
-	Timeout time.Duration
+	client *http.Client
 }
 
 func NewAuth(username, password, bearer string) *auth {
@@ -44,16 +43,19 @@ func NewAuth(username, password, bearer string) *auth {
 	}
 }
 
-func New() *Request {
+func New(params ...interface{}) *Request {
 	r := new(Request)
+	timeout := 30 * time.Second
 
-	r.Timeout = 30 * time.Second
+	if len(params) == 1 {
+		timeout = time.Duration(params[0].(int)) * time.Second
+	}
 
 	// TODO: Set Transport for TLS
 	// TODO: Allow Transport to be overriden by user
 
 	r.client = &http.Client{
-		Timeout: r.Timeout,
+		Timeout: timeout,
 	}
 
 	return r
