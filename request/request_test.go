@@ -53,3 +53,24 @@ func TestValidateOverridingHttpClientTimeout(t *testing.T) {
 
 	assert.Equal(t, 45*time.Second, r.client.Timeout, "Should equals 45 seconds")
 }
+
+func TestSplitUserNamePassword(t *testing.T) {
+	// REMARKS: The user/pwd can be provided in the URL when doing Basic Authentication (RFC 1738)
+	url := "https://testuser:testpass12345@mysite.com"
+
+	usr, pwd, err := splitUserNamePassword(url)
+
+	assert.Equal(t, "testuser", usr, "Should equal username")
+	assert.Equal(t, "testpass12345", pwd, "Should equal password")
+	assert.Nil(t, err, "Should be nil")
+}
+
+func TestSplitUserNamePasswordNoCredentialsFound(t *testing.T) {
+	url := "https://mysite.com"
+
+	usr, pwd, err := splitUserNamePassword(url)
+
+	assert.Empty(t, usr, "Should be empty")
+	assert.Empty(t, pwd, "Should be empty")
+	assert.EqualError(t, err, "No credentials found in URI")
+}
