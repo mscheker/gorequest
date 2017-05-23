@@ -212,7 +212,7 @@ func (r *Request) doRequest(m string, o *Option) (*http.Response, []byte, error)
 
 	if o.Auth != nil {
 		if o.Auth.Bearer != "" {
-			req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", o.Auth.Bearer))
+			o.Headers["Authorization"] = fmt.Sprintf("Bearer %s", o.Auth.Bearer)
 		} else if o.Auth.Username != "" && o.Auth.Password != "" {
 			req.SetBasicAuth(o.Auth.Username, o.Auth.Password)
 		}
