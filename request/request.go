@@ -173,11 +173,8 @@ func getRequestBody(o *Option) *bytes.Buffer {
 		buff = []byte(b.String())
 		body = bytes.NewBuffer(buff)
 
-		// TODO: Need to set headers accordingly (Other headers other than the two below ?
 		if j.Bool() {
 			contentType = "application/json"
-		} else {
-			contentType = "text/plain"
 		}
 		break
 	case reflect.Struct:
@@ -197,7 +194,9 @@ func getRequestBody(o *Option) *bytes.Buffer {
 	}
 
 	// TODO: Change headers property to be a struct ?
-	o.Headers["Content-Type"] = contentType
+	if contentType != "" {
+		o.Headers["Content-Type"] = contentType
+	}
 
 	return body
 }
@@ -214,6 +213,7 @@ func (r *Request) doRequest(m string, o *Option) (*http.Response, []byte, error)
 		panic(err)
 	}
 
+	// TODO: Improve setting Authorization header
 	if o.Auth != nil {
 		if o.Auth.Bearer != "" {
 			o.Headers["Authorization"] = fmt.Sprintf("Bearer %s", o.Auth.Bearer)
@@ -230,7 +230,6 @@ func (r *Request) doRequest(m string, o *Option) (*http.Response, []byte, error)
 	}
 
 	// TODO: Validate headers against known list of headers ?
-	// TODO: Ensure headers are only set once
 	for k, v := range o.Headers {
 		req.Header.Add(k, v)
 	}
