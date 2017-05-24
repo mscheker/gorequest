@@ -1,9 +1,14 @@
 package request
 
 import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,6 +18,30 @@ const (
 	hash    = "Z29sYW5ndGVzdA=="
 	testUrl = "https://www.google.com"
 )
+
+type TestCustomer struct {
+	Id        int    `json:"id"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+}
+
+func newTestCustomer(id int, firstName, lastName string) *TestCustomer {
+	return &TestCustomer{
+		Id:        id,
+		FirstName: firstName,
+		LastName:  lastName,
+	}
+}
+
+var testCustomers = make([]*TestCustomer, 0)
+var testRouter *mux.Router
+var testRecorder *httptest.ResponseRecorder
+
+func init() {
+	testCustomers = append(testCustomers,
+		newTestCustomer(1, "John", "Doe"),
+		newTestCustomer(2, "Jane", "Doe"))
+}
 
 func TestValidateSingleInstance(t *testing.T) {
 	i1 := getInstance()
@@ -81,4 +110,35 @@ func TestSplitUserNamePasswordNoCredentialsFound(t *testing.T) {
 	assert.Empty(t, u, "Should be empty")
 	assert.Empty(t, p, "Should be empty")
 	assert.EqualError(t, e, "No credentials found in URI")
+}
+
+func TestGetRequest(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+		if json, err := json.Marshal(testCustomers); err != nil {
+			resp.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(resp, err.Error())
+		} else {
+			fmt.Fprintf(resp, string(json))
+		}
+	}))
+
+	defer ts.Close()
+
+	options := &Option{
+		Url: ts.URL,
+	}
+
+	resp, body, err := Get(options)
+
+	assert.Nil(t, err, "Should be nil")
+	assert.Equal(t, 200, resp.StatusCode, "Should equal HTTP Status 200 (OK)")
+
+	customers := make([]*TestCustomer, 0)
+
+	err = json.Unmarshal(body, &customers)
+
+	assert.Nil(t, err, "Should be nil")
+	assert.True(t, len(customers) == 2, "Should have two items")
+	assert.Equal(t, testCustomers[0], customers[0], "Should be equal")
+	assert.Equal(t, testCustomers[1], customers[1], "Should be equal")
 }
