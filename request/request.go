@@ -229,7 +229,6 @@ func (r *Request) doRequest(m string, o *Option) (*http.Response, []byte, error)
 		}
 	}
 
-	// TODO: Validate headers against known list of headers ?
 	for k, v := range o.Headers {
 		req.Header.Add(k, v)
 	}
