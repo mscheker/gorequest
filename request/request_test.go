@@ -142,3 +142,44 @@ func TestGetRequest(t *testing.T) {
 	assert.Equal(t, testCustomers[0], customers[0], "Should be equal")
 	assert.Equal(t, testCustomers[1], customers[1], "Should be equal")
 }
+
+func TestPostRequest(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+		var customer *TestCustomer
+
+		decoder := json.NewDecoder(req.Body)
+
+		if err := decoder.Decode(&customer); err != nil {
+			resp.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(resp, err.Error())
+		} else {
+			testCustomers = append(testCustomers, customer)
+
+			resp.WriteHeader(http.StatusCreated)
+			fmt.Fprintf(resp, "Created")
+		}
+	}))
+
+	defer ts.Close()
+
+	c1 := &TestCustomer{
+		Id:        3,
+		FirstName: "PostTest",
+		LastName:  "PostTest",
+	}
+
+	options := &Option{
+		Url:  ts.URL,
+		JSON: c1,
+	}
+
+	resp, body, err := Post(options)
+
+	assert.Nil(t, err, "Should be nil")
+	assert.Equal(t, 201, resp.StatusCode, "Should equal HTTP Status 201 (Created)")
+	assert.Equal(t, "Created", string(body), "Should equal body")
+	assert.Equal(t, "application/json", options.Headers["Content-Type"], "Should have set Content-Type to application/json")
+
+	assert.True(t, len(testCustomers) == 3, "Should have three items")
+	assert.Equal(t, testCustomers[2], c1, "Should be equal")
+}
