@@ -29,6 +29,7 @@ type Option struct {
 	Auth    *auth
 	Body    interface{}
 	JSON    interface{}
+	Method  string
 }
 
 type Request struct {
@@ -61,12 +62,39 @@ func New(params ...interface{}) *Request {
 	return r
 }
 
-func NewRequest(url string) (*http.Response, []byte, error) {
-	o := &Option{
-		Url: url,
+func NewRequest(val interface{}) (*http.Response, []byte, error) {
+	v := reflect.Indirect(reflect.ValueOf(val))
+
+	if v.Kind() == reflect.String {
+		o := &Option{
+			Url: v.String(),
+		}
+
+		return Get(o)
 	}
 
-	return Get(o)
+	if v.Kind() != reflect.Struct {
+		panic(errors.New("Invalid argument type"))
+	}
+
+	if reflect.TypeOf(val) != reflect.TypeOf(&Option{}) {
+		panic(errors.New(fmt.Sprintf("Type was %v but expected %v", reflect.TypeOf(val), reflect.TypeOf(&Option{}))))
+	}
+
+	o := val.(*Option)
+
+	switch strings.ToUpper(o.Method) {
+	case "GET":
+		return Get(o)
+	case "POST":
+		return Post(o)
+	case "PUT":
+		return Put(o)
+	case "DELETE":
+		return Delete(o)
+	default:
+		panic(errors.New("Unknown method specified"))
+	}
 }
 
 func (r *Request) Post(o *Option) (*http.Response, []byte, error) {
