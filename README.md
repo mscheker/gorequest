@@ -13,6 +13,7 @@ $ go get github.com/mscheker/gorequest
 ```
 
 ## Simple to Use
+### With URL - Defaults to method: GET
 ```go
 package main
 
@@ -25,6 +26,28 @@ import (
 func main() {
 	resp, body, err := request.NewRequest("https://www.google.com")
 	
+	fmt.Printf("Response: %v \n\r", resp)
+	fmt.Printf("Body: %s \n\r", string(body))
+	fmt.Printf("Error: %v \n\r", err)
+}
+```
+### With Options
+```go
+package main
+
+import (
+	"fmt"
+
+	request "github.com/mscheker/gorequest"
+)
+
+func main() {
+	options := &request.Option{
+		Url:    "https://www.google.com",
+		Method: "GET",
+	}
+	resp, body, err := request.NewRequest(options)
+
 	fmt.Printf("Response: %v \n\r", resp)
 	fmt.Printf("Body: %s \n\r", string(body))
 	fmt.Printf("Error: %v \n\r", err)
