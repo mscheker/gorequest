@@ -98,7 +98,9 @@ func NewRequest(val interface{}) (*http.Response, []byte, error) {
 }
 
 func (r *Request) Post(o *Option) (*http.Response, []byte, error) {
-	return r.doRequest("POST", o)
+	o.Method = "POST"
+
+	return r.doRequest(o)
 }
 
 func Post(o *Option) (*http.Response, []byte, error) {
@@ -106,7 +108,9 @@ func Post(o *Option) (*http.Response, []byte, error) {
 }
 
 func (r *Request) Put(o *Option) (*http.Response, []byte, error) {
-	return r.doRequest("PUT", o)
+	o.Method = "PUT"
+
+	return r.doRequest(o)
 }
 
 func Put(o *Option) (*http.Response, []byte, error) {
@@ -121,8 +125,9 @@ func (r *Request) Get(o *Option) (*http.Response, []byte, error) {
 	// Section 5.2: The exact resource identified by an Internet request is determined by examining both the Request-URI and the Host header field.
 	// Section 9.3: The GET method means retrieve whatever information (in the form of an entity) is identified by the Request-URI.
 	o.Body = nil
+	o.Method = "GET"
 
-	return r.doRequest("GET", o)
+	return r.doRequest(o)
 }
 
 func Get(o *Option) (*http.Response, []byte, error) {
@@ -132,8 +137,9 @@ func Get(o *Option) (*http.Response, []byte, error) {
 func (r *Request) Delete(o *Option) (*http.Response, []byte, error) {
 	// REMARKS: Ignore Body - RFC2616
 	o.Body = nil
+	o.Method = "DELETE"
 
-	return r.doRequest("DELETE", o)
+	return r.doRequest(o)
 }
 
 func Delete(o *Option) (*http.Response, []byte, error) {
@@ -230,12 +236,12 @@ func getRequestBody(o *Option) *bytes.Buffer {
 }
 
 // REMARKS: The Body in the http.Response will be closed when returning a response to the caller
-func (r *Request) doRequest(m string, o *Option) (*http.Response, []byte, error) {
+func (r *Request) doRequest(o *Option) (*http.Response, []byte, error) {
 	if o.Headers == nil {
 		o.Headers = make(map[string]string)
 	}
 	body := getRequestBody(o)
-	req, err := http.NewRequest(m, o.Url, body)
+	req, err := http.NewRequest(o.Method, o.Url, body)
 
 	if err != nil {
 		panic(err)
