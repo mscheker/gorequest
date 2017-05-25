@@ -13,10 +13,11 @@ $ go get github.com/mscheker/gorequest
 ```
 
 ## Table of Contents
-[Simple to Use](#simpletouse)
-* [With URL](#simpletousewithurl)
-* [With Options](#simpletousewithoptions)
-[Convenience Methods](#conveniencemethods)
+[Simple to Use](#simple-to-use)
+* [With URL](#with-url---defaults-to-method-get)
+* [With Options](#with-options)
+
+[Convenience Methods](#convenience-methods)
 
 ## Simple to Use
 ### With URL - Defaults to method: GET
