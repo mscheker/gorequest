@@ -92,6 +92,8 @@ func NewRequest(val interface{}) (*http.Response, []byte, error) {
 		return Put(o)
 	case "DELETE":
 		return Delete(o)
+	case "HEAD":
+		return Head(o)
 	default:
 		panic(errors.New("Unknown method specified"))
 	}
@@ -144,6 +146,16 @@ func (r *Request) Delete(o *Option) (*http.Response, []byte, error) {
 
 func Delete(o *Option) (*http.Response, []byte, error) {
 	return getInstance().Delete(o)
+}
+
+func (r *Request) Head(o *Option) (*http.Response, []byte, error) {
+	o.Method = "HEAD"
+
+	return r.doRequest(o)
+}
+
+func Head(o *Option) (*http.Response, []byte, error) {
+	return getInstance().Head(o)
 }
 
 // ********** Private methods/functions **********

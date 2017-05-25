@@ -301,3 +301,17 @@ func TestPostRequest(t *testing.T) {
 	assert.True(t, len(testCustomers) == 3, "Should have three items")
 	assert.Equal(t, testCustomers[2], c1, "Should be equal")
 }
+
+func TestHeadRequest(t *testing.T) {
+	options := &Option{
+		Url:    "https://www.google.com",
+		Method: "HEAD",
+	}
+
+	resp, body, err := NewRequest(options)
+
+	assert.Nil(t, err, "Should be nil")
+	assert.Equal(t, "HEAD", resp.Request.Method, "Should equal HEAD method")
+	assert.Equal(t, 200, resp.StatusCode, "Should equal HTTP Status 200 (OK)")
+	assert.Empty(t, string(body), "Should be empty")
+}
