@@ -58,11 +58,12 @@ func main() {
 
 ## Convenience Methods
 
-There are methods for each different HTTP Verbs; these methods are similar to NewRequest() but the method attribute is set for you:
+There are methods for each different HTTP Verb; these methods are similar to NewRequest() but the method field is set for you:
 
 * request.Get() - Defaults to method: "GET"
 * request.Post() - Defaults to method: "POST"
 * request.Put() - Defaults to method: "PUT"
 * request.Delete() - Defaults to method: "DELETE"
+* request.Head() - Defaults to method: "HEAD"
 
 ## Credits
