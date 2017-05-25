@@ -11,7 +11,7 @@ GoRequest makes HTTP requests simple and idiomatic. It was implemented and desig
 $ go get github.com/mscheker/gorequest
 ```
 
-## Simple to use
+## Simple to Use
 ```go
 package main
 
@@ -31,5 +31,14 @@ func main() {
 ```
 
 ## Table of Contents
+
+## Convenience Methods
+
+There are methods for each different HTTP Verbs; these methods are similar to NewRequest() but the method attribute is set for you:
+
+* request.Get() - Defaults to method: "GET"
+* request.Post() - Defaults to method: "POST"
+* request.Put() - Defaults to method: "PUT"
+* request.Delete() - Defaults to method: "DELETE"
 
 ## Credits
