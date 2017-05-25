@@ -12,7 +12,15 @@ GoRequest makes HTTP requests simple and idiomatic. It was implemented and desig
 $ go get github.com/mscheker/gorequest
 ```
 
+## Table of Contents
+[Simple to Use](#simpletouse)
+* [With URL](#simpletousewithurl)
+* [With Options](#simpletousewithoptions)
+[Convenience Methods](#conveniencemethods)
+
+<a name="simpletouse" />
 ## Simple to Use
+<a name="simpletousewithurl" />
 ### With URL - Defaults to method: GET
 ```go
 package main
@@ -31,6 +39,7 @@ func main() {
 	fmt.Printf("Error: %v \n\r", err)
 }
 ```
+<a name="simpletousewithoptions" />
 ### With Options
 ```go
 package main
@@ -54,8 +63,7 @@ func main() {
 }
 ```
 
-## Table of Contents
-
+<a name="conveniencemethods" />
 ## Convenience Methods
 
 There are methods for each different HTTP Verb; these methods are similar to NewRequest() but the method field is set for you:
