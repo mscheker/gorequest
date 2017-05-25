@@ -1,4 +1,4 @@
-# GoRequest
+# GoRequest - ![Build Status](https://travis-ci.org/mscheker/gorequest.svg?branch=master)
 
 ## Disclaimer
 Not all functionality from the original Node.js request module has been yet ported. WIP
