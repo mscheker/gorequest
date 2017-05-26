@@ -95,7 +95,7 @@ func NewRequest(val interface{}) (*http.Response, []byte, error) {
 	case "HEAD":
 		return Head(o)
 	default:
-		panic(errors.New("Unknown method specified"))
+		return Get(o)
 	}
 }
 
