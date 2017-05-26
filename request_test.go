@@ -224,6 +224,23 @@ func TestNewRequestPanicWhenInvalidStructType(t *testing.T) {
 	assert.True(t, false, "Should not have completed test")
 }
 
+func TestNewRequestWithoutURL(t *testing.T) {
+	defer func() {
+		err := recover().(error)
+
+		assert.NotNil(t, err, "Should not be nil")
+		assert.Equal(t, "URL is required", err.Error(), "Should equal error message")
+	}()
+
+	o := &Option{
+		Url: "",
+	}
+
+	NewRequest(o)
+
+	assert.True(t, false, "Should not have completed test")
+}
+
 func TestGetRequest(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 		if json, err := json.Marshal(testCustomers); err != nil {
