@@ -17,6 +17,7 @@ $ go get github.com/mscheker/gorequest
 * [With URL](#with-url---defaults-to-method-get)
 * [With Options](#with-options)
 
+[Options](#options)
 [Convenience Methods](#convenience-methods)
 
 ## Simple to Use
@@ -61,6 +62,28 @@ func main() {
 	fmt.Printf("Error: %v \n\r", err)
 }
 ```
+
+## Options
+```go
+func NewRequest(val interface{}) (*http.Response, []byte, error) {...}
+```
+The argument can be either a URL or an options struct. The only required option is URL; all others are optional.
+```go
+type Option struct {
+	Url     string
+	Headers map[string]string
+	Auth    *auth
+	Body    interface{}
+	JSON    interface{}
+	Method  string
+}
+```
+* `Url` - Fully qualified URL
+* `Method` - HTTP method (Defaults to "GET")
+* `Headers` - HTTP headers (Defaults to an empty map)
+* `Body` - Entity body for POST and PUT requests. Must be a string or struct. If JSON is true, Body must be a JSON serializable struct or a valid JSON formatted string. `Body is ignored for GET and DELETE requests`.
+* `JSON` - A JSON serializable struct or a valid JSON formatted string. Sets the Body to a JSON representation of the data and sets the `Content-Type header to application/json`. If set to true, it will attempt to serialize the Body.
+* `Auth` - A struct containing values for `username` and `password`, or `bearer` token.
 
 ## Convenience Methods
 
