@@ -179,20 +179,16 @@ func TestNewRequestWithOptions(t *testing.T) {
 }
 
 func TestNewRequestWithOptionsWithoutMethodSpecified(t *testing.T) {
-	defer func() {
-		err := recover().(error)
-
-		assert.NotNil(t, err, "Should not be nil")
-		assert.Equal(t, "Unknown method specified", err.Error(), "Should equal error message")
-	}()
-
 	o := &Option{
 		Url: "https://www.google.com",
 	}
 
-	NewRequest(o)
+	resp, body, err := NewRequest(o)
 
-	assert.True(t, false, "Should not have completed test")
+	assert.Nil(t, err, "Should be nil")
+	assert.Equal(t, "GET", resp.Request.Method, "Should equal GET method")
+	assert.Equal(t, 200, resp.StatusCode, "Should equal HTTP Status 200 (OK)")
+	assert.NotEmpty(t, string(body), "Should not be empty")
 }
 
 func TestNewRequestPanicWhenInvalidArgumentType(t *testing.T) {
