@@ -36,10 +36,18 @@ type Request struct {
 	client *http.Client
 }
 
-func NewAuth(username, password, bearer string) *auth {
+func NewAuth(vals ...string) *auth {
+	if len(vals) < 2 {
+		panic(errors.New("Not enough arguments provided"))
+	}
+
+	bearer := ""
+	if len(vals) > 2 {
+		bearer = vals[2]
+	}
 	return &auth{
-		Username: username,
-		Password: password,
+		Username: vals[0],
+		Password: vals[1],
 		Bearer:   bearer,
 	}
 }
@@ -95,7 +103,7 @@ func NewRequest(val interface{}) (*http.Response, []byte, error) {
 	case "HEAD":
 		return Head(o)
 	default:
-		panic(errors.New("Unknown method specified"))
+		return Get(o)
 	}
 }
 
@@ -249,6 +257,10 @@ func getRequestBody(o *Option) *bytes.Buffer {
 
 // REMARKS: The Body in the http.Response will be closed when returning a response to the caller
 func (r *Request) doRequest(o *Option) (*http.Response, []byte, error) {
+	if strings.Trim(o.Url, " ") == "" {
+		panic(errors.New("URL is required"))
+	}
+
 	if o.Headers == nil {
 		o.Headers = make(map[string]string)
 	}
@@ -265,6 +277,7 @@ func (r *Request) doRequest(o *Option) (*http.Response, []byte, error) {
 			o.Headers["Authorization"] = fmt.Sprintf("Bearer %s", o.Auth.Bearer)
 		} else if o.Auth.Username != "" && o.Auth.Password != "" {
 			req.SetBasicAuth(o.Auth.Username, o.Auth.Password)
+			o.Headers["Authorization"] = req.Header.Get("Authorization")
 		}
 	} else if usr, pwd, err := splitUserNamePassword(o.Url); err != nil {
 		// TODO: Should we panic if an error is returned or silently ignore this - maybe give some warning ?
@@ -276,6 +289,9 @@ func (r *Request) doRequest(o *Option) (*http.Response, []byte, error) {
 	}
 
 	for k, v := range o.Headers {
+		if req.Header.Get(k) != "" {
+			continue
+		}
 		req.Header.Add(k, v)
 	}
 

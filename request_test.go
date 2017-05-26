@@ -1,6 +1,7 @@
 package gorequest
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -179,20 +180,16 @@ func TestNewRequestWithOptions(t *testing.T) {
 }
 
 func TestNewRequestWithOptionsWithoutMethodSpecified(t *testing.T) {
-	defer func() {
-		err := recover().(error)
-
-		assert.NotNil(t, err, "Should not be nil")
-		assert.Equal(t, "Unknown method specified", err.Error(), "Should equal error message")
-	}()
-
 	o := &Option{
 		Url: "https://www.google.com",
 	}
 
-	NewRequest(o)
+	resp, body, err := NewRequest(o)
 
-	assert.True(t, false, "Should not have completed test")
+	assert.Nil(t, err, "Should be nil")
+	assert.Equal(t, "GET", resp.Request.Method, "Should equal GET method")
+	assert.Equal(t, 200, resp.StatusCode, "Should equal HTTP Status 200 (OK)")
+	assert.NotEmpty(t, string(body), "Should not be empty")
 }
 
 func TestNewRequestPanicWhenInvalidArgumentType(t *testing.T) {
@@ -226,6 +223,41 @@ func TestNewRequestPanicWhenInvalidStructType(t *testing.T) {
 	NewRequest(o)
 
 	assert.True(t, false, "Should not have completed test")
+}
+
+func TestNewRequestWithoutURL(t *testing.T) {
+	defer func() {
+		err := recover().(error)
+
+		assert.NotNil(t, err, "Should not be nil")
+		assert.Equal(t, "URL is required", err.Error(), "Should equal error message")
+	}()
+
+	o := &Option{
+		Url: "",
+	}
+
+	NewRequest(o)
+
+	assert.True(t, false, "Should not have completed test")
+}
+
+func TestBasicAuthentication(t *testing.T) {
+	options := &Option{
+		Url:    "https://postman-echo.com/basic-auth",
+		Method: "GET",
+		Auth:   NewAuth("postman", "password"),
+	}
+	resp, body, err := NewRequest(options)
+
+	basicAuth := base64.StdEncoding.EncodeToString([]byte("postman:password"))
+	basicAuth = "Basic " + basicAuth
+
+	assert.Nil(t, err, "Should be nil")
+	assert.Equal(t, "GET", resp.Request.Method, "Should equal GET method")
+	assert.Equal(t, 200, resp.StatusCode, "Should equal HTTP Status 200 (OK)")
+	assert.Equal(t, "{\"authenticated\":true}", string(body), "Should equal body")
+	assert.Equal(t, basicAuth, options.Headers["Authorization"], "Should equal Authorization header")
 }
 
 func TestGetRequest(t *testing.T) {
