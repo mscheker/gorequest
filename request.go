@@ -249,6 +249,10 @@ func getRequestBody(o *Option) *bytes.Buffer {
 
 // REMARKS: The Body in the http.Response will be closed when returning a response to the caller
 func (r *Request) doRequest(o *Option) (*http.Response, []byte, error) {
+	if strings.Trim(o.Url, " ") == "" {
+		panic(errors.New("URL is required"))
+	}
+
 	if o.Headers == nil {
 		o.Headers = make(map[string]string)
 	}
