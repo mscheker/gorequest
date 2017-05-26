@@ -25,6 +25,8 @@ $ go get github.com/mscheker/gorequest
 
 [Convenience Methods](#convenience-methods)
 
+[Credits](#credits)
+
 ## Simple to Use
 ### With URL - Defaults to method: GET
 ```go
