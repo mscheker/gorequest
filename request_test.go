@@ -1,6 +1,7 @@
 package gorequest
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -239,6 +240,24 @@ func TestNewRequestWithoutURL(t *testing.T) {
 	NewRequest(o)
 
 	assert.True(t, false, "Should not have completed test")
+}
+
+func TestBasicAuthentication(t *testing.T) {
+	options := &Option{
+		Url:    "https://postman-echo.com/basic-auth",
+		Method: "GET",
+		Auth:   NewAuth("postman", "password"),
+	}
+	resp, body, err := NewRequest(options)
+
+	basicAuth := base64.StdEncoding.EncodeToString([]byte("postman:password"))
+	basicAuth = "Basic " + basicAuth
+
+	assert.Nil(t, err, "Should be nil")
+	assert.Equal(t, "GET", resp.Request.Method, "Should equal GET method")
+	assert.Equal(t, 200, resp.StatusCode, "Should equal HTTP Status 200 (OK)")
+	assert.Equal(t, "{\"authenticated\":true}", string(body), "Should equal body")
+	assert.Equal(t, basicAuth, options.Headers["Authorization"], "Should equal Authorization header")
 }
 
 func TestGetRequest(t *testing.T) {
