@@ -5,8 +5,8 @@ package gorequest
  */
 
 import (
-  impl "gorequest/impl"
-  model "gorequest/model"
+  impl "github.com/demianlessa/gorequest/impl"
+  model "github.com/demianlessa/gorequest/model"
 )
 
 /**

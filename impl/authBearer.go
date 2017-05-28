@@ -2,7 +2,7 @@ package gorequest
 
 import (
 	"fmt"
-	model "gorequest/model"
+	model "github.com/demianlessa/gorequest/model"
 	"net/http"
 )
 

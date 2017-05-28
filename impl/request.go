@@ -1,7 +1,7 @@
 package gorequest
 
 import (
-	model "gorequest/model"
+	model "github.com/demianlessa/gorequest/model"
 	"io/ioutil"
 	"net/http"
 )

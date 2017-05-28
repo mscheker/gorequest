@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	model "gorequest/model"
+	model "github.com/demianlessa/gorequest/model"
 	"reflect"
 )
 

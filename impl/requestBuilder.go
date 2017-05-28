@@ -2,7 +2,7 @@ package gorequest
 
 import (
 	"bytes"
-	model "gorequest/model"
+	model "github.com/demianlessa/gorequest/model"
 	"errors"
 	"net/http"
 	"strings"
