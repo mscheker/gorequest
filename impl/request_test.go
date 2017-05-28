@@ -50,8 +50,8 @@ func init() {
 }
 
 func TestValidateSingleInstance(t *testing.T) {
-	i1 := getInstance()
-	i2 := getInstance()
+	i1 := getDefaultHttpClient()
+	i2 := getDefaultHttpClient()
 
 	assert.NotNil(t, i1, "Should not be nil")
 	assert.NotNil(t, i2, "Should not be nil")
@@ -59,9 +59,9 @@ func TestValidateSingleInstance(t *testing.T) {
 }
 
 func TestValidateMultipleInstances(t *testing.T) {
-	i1 := getInstance()
-	instance = nil
-	i2 := getInstance()
+	i1 := getDefaultHttpClient()
+	httpClient = nil
+	i2 := getDefaultHttpClient()
 
 	assert.NotNil(t, i1, "Should not be nil")
 	assert.NotNil(t, i2, "Should not be nil")
@@ -69,26 +69,22 @@ func TestValidateMultipleInstances(t *testing.T) {
 }
 
 func TestValidateNewAuth(t *testing.T) {
-	auth := NewAuth(user, pass, hash)
-
-	assert.Equal(t, user, auth.Username, "Should equal username")
-	assert.Equal(t, pass, auth.Password, "Should equal password")
-	assert.Equal(t, hash, auth.Bearer, "Should equal token")
+	auth := newAuthBearer(hash)
+	
+	assert.Equal(t, hash, auth.(*authBearer).token, "Should equal token")
 }
 
 func TestValidateDefaultHttpClientTimeout(t *testing.T) {
-	r := New()
-
-	assert.Equal(t, 30*time.Second, r.client.Timeout, "Should default to 30 seconds")
+	r := getDefaultHttpClient()
+	assert.Equal(t, defaultTimeout, r.Timeout, "Should use the default timeout")
 }
 
 func TestValidateOverridingHttpClientTimeout(t *testing.T) {
-	// REMARKS: Override timeout value to 45 seconds
-	r := New(45)
-
-	assert.Equal(t, 45*time.Second, r.client.Timeout, "Should equals 45 seconds")
+	r := getHttpClient(45)
+	assert.Equal(t, 45*time.Second, r.Timeout, "Should use the specified timeout: 45 seconds")
 }
 
+/*
 func TestSplitUserNamePassword(t *testing.T) {
 	// REMARKS: The user/pwd can be provided in the URL when doing Basic Authentication (RFC 1738)
 	url := "https://testuser:testpass12345@mysite.com"
@@ -117,6 +113,7 @@ func TestSplitUserNamePasswordNoCredentialsFound(t *testing.T) {
 	assert.Empty(t, p, "Should be empty")
 	assert.EqualError(t, e, "No credentials found in URI")
 }
+*/
 
 func TestNewRequestWithUrl(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
@@ -130,15 +127,14 @@ func TestNewRequestWithUrl(t *testing.T) {
 
 	defer ts.Close()
 
-	resp, body, err := NewRequest(ts.URL)
+	response := NewRequestBuilder().WithUrl(ts.URL).Build().Do()
 
-	assert.Nil(t, err, "Should be nil")
-	assert.Equal(t, "GET", resp.Request.Method, "Should equal GET method")
-	assert.Equal(t, 200, resp.StatusCode, "Should equal HTTP Status 200 (OK)")
+	assert.Equal(t, "GET", response.Response().Request.Method, "Should equal GET method")
+	assert.Equal(t, 200, response.Response().StatusCode, "Should equal HTTP Status 200 (OK)")
 
 	customers := make([]*TestCustomer, 0)
 
-	err = json.Unmarshal(body, &customers)
+	err := json.Unmarshal(response.Body(), &customers)
 
 	assert.Nil(t, err, "Should be nil")
 	assert.True(t, len(customers) == 2, "Should have two items")
@@ -158,20 +154,14 @@ func TestNewRequestWithOptions(t *testing.T) {
 
 	defer ts.Close()
 
-	options := &Option{
-		Url:    ts.URL,
-		Method: "GET",
-	}
+	response := NewRequestBuilder().WithUrl(ts.URL).WithMethod("GET").Build().Do()
 
-	resp, body, err := NewRequest(options)
-
-	assert.Nil(t, err, "Should be nil")
-	assert.Equal(t, "GET", resp.Request.Method, "Should equal GET method")
-	assert.Equal(t, 200, resp.StatusCode, "Should equal HTTP Status 200 (OK)")
+	assert.Equal(t, "GET", response.Response().Request.Method, "Should equal GET method")
+	assert.Equal(t, 200, response.Response().StatusCode, "Should equal HTTP Status 200 (OK)")
 
 	customers := make([]*TestCustomer, 0)
 
-	err = json.Unmarshal(body, &customers)
+	err := json.Unmarshal(response.Body(), &customers)
 
 	assert.Nil(t, err, "Should be nil")
 	assert.True(t, len(customers) == 2, "Should have two items")
@@ -180,22 +170,16 @@ func TestNewRequestWithOptions(t *testing.T) {
 }
 
 func TestNewRequestWithOptionsWithoutMethodSpecified(t *testing.T) {
-	o := &Option{
-		Url: "https://www.google.com",
-	}
-
-	resp, body, err := NewRequest(o)
-
-	assert.Nil(t, err, "Should be nil")
-	assert.Equal(t, "GET", resp.Request.Method, "Should equal GET method")
-	assert.Equal(t, 200, resp.StatusCode, "Should equal HTTP Status 200 (OK)")
-	assert.NotEmpty(t, string(body), "Should not be empty")
+	response := NewRequestBuilder().WithUrl("https://www.google.com").Build().Do()
+	assert.Equal(t, "GET", response.Response().Request.Method, "Should equal GET method")
+	assert.Equal(t, 200, response.Response().StatusCode, "Should equal HTTP Status 200 (OK)")
+	assert.NotEmpty(t, string(response.Body()), "Should not be empty")
 }
 
+/*
 func TestNewRequestPanicWhenInvalidArgumentType(t *testing.T) {
 	defer func() {
 		err := recover().(error)
-
 		assert.NotNil(t, err, "Should not be nil")
 		assert.Equal(t, "Invalid argument type", err.Error(), "Should equal error message")
 	}()
@@ -224,6 +208,7 @@ func TestNewRequestPanicWhenInvalidStructType(t *testing.T) {
 
 	assert.True(t, false, "Should not have completed test")
 }
+*/
 
 func TestNewRequestWithoutURL(t *testing.T) {
 	defer func() {
@@ -233,31 +218,21 @@ func TestNewRequestWithoutURL(t *testing.T) {
 		assert.Equal(t, "URL is required", err.Error(), "Should equal error message")
 	}()
 
-	o := &Option{
-		Url: "",
-	}
-
-	NewRequest(o)
+	NewRequestBuilder().Build()
 
 	assert.True(t, false, "Should not have completed test")
 }
 
 func TestBasicAuthentication(t *testing.T) {
-	options := &Option{
-		Url:    "https://postman-echo.com/basic-auth",
-		Method: "GET",
-		Auth:   NewAuth("postman", "password"),
-	}
-	resp, body, err := NewRequest(options)
+	response := NewRequestBuilder().WithUrl("https://postman-echo.com/basic-auth").WithBasicAuth("postman", "password").Build().Do()
 
 	basicAuth := base64.StdEncoding.EncodeToString([]byte("postman:password"))
 	basicAuth = "Basic " + basicAuth
 
-	assert.Nil(t, err, "Should be nil")
-	assert.Equal(t, "GET", resp.Request.Method, "Should equal GET method")
-	assert.Equal(t, 200, resp.StatusCode, "Should equal HTTP Status 200 (OK)")
-	assert.Equal(t, "{\"authenticated\":true}", string(body), "Should equal body")
-	assert.Equal(t, basicAuth, options.Headers["Authorization"], "Should equal Authorization header")
+	assert.Equal(t, "GET", response.Response().Request.Method, "Should equal GET method")
+	assert.Equal(t, 200, response.Response().StatusCode, "Should equal HTTP Status 200 (OK)")
+	assert.Equal(t, "{\"authenticated\":true}", string(response.Body()), "Should equal body")
+	assert.Equal(t, basicAuth, response.Response().Request.Header.Get("Authorization"), "Should equal Authorization header")
 }
 
 func TestGetRequest(t *testing.T) {
@@ -272,19 +247,14 @@ func TestGetRequest(t *testing.T) {
 
 	defer ts.Close()
 
-	options := &Option{
-		Url: ts.URL,
-	}
+	response := NewRequestBuilder().WithUrl(ts.URL).Build().Do()
 
-	resp, body, err := Get(options)
-
-	assert.Nil(t, err, "Should be nil")
-	assert.Equal(t, "GET", resp.Request.Method, "Should equal GET method")
-	assert.Equal(t, 200, resp.StatusCode, "Should equal HTTP Status 200 (OK)")
+	assert.Equal(t, "GET", response.Response().Request.Method, "Should equal GET method")
+	assert.Equal(t, 200, response.Response().StatusCode, "Should equal HTTP Status 200 (OK)")
 
 	customers := make([]*TestCustomer, 0)
 
-	err = json.Unmarshal(body, &customers)
+	err := json.Unmarshal(response.Body(), &customers)
 
 	assert.Nil(t, err, "Should be nil")
 	assert.True(t, len(customers) == 2, "Should have two items")
@@ -317,33 +287,21 @@ func TestPostRequest(t *testing.T) {
 		LastName:  "PostTest",
 	}
 
-	options := &Option{
-		Url:  ts.URL,
-		JSON: c1,
-	}
+	response := NewRequestBuilder().WithUrl(ts.URL).WithMethod("POST").WithBody(newJsonBody(c1)).Build().Do()
 
-	resp, body, err := Post(options)
-
-	assert.Nil(t, err, "Should be nil")
-	assert.Equal(t, "POST", resp.Request.Method, "Should equal POST method")
-	assert.Equal(t, 201, resp.StatusCode, "Should equal HTTP Status 201 (Created)")
-	assert.Equal(t, "Created", string(body), "Should equal body")
-	assert.Equal(t, "application/json", options.Headers["Content-Type"], "Should have set Content-Type to application/json")
+	assert.Equal(t, "POST", response.Response().Request.Method, "Should equal POST method")
+	assert.Equal(t, 201, response.Response().StatusCode, "Should equal HTTP Status 201 (Created)")
+	assert.Equal(t, "Created", string(response.Body()), "Should equal body")
+	assert.Equal(t, "application/json", response.Response().Request.Header.Get("Content-Type"), "Should have set Content-Type to application/json")
 
 	assert.True(t, len(testCustomers) == 3, "Should have three items")
 	assert.Equal(t, testCustomers[2], c1, "Should be equal")
 }
 
 func TestHeadRequest(t *testing.T) {
-	options := &Option{
-		Url:    "https://www.google.com",
-		Method: "HEAD",
-	}
+	response := NewRequestBuilder().WithUrl("https://www.google.com").WithMethod("HEAD").Build().Do()
 
-	resp, body, err := NewRequest(options)
-
-	assert.Nil(t, err, "Should be nil")
-	assert.Equal(t, "HEAD", resp.Request.Method, "Should equal HEAD method")
-	assert.Equal(t, 200, resp.StatusCode, "Should equal HTTP Status 200 (OK)")
-	assert.Empty(t, string(body), "Should be empty")
+	assert.Equal(t, "HEAD", response.Response().Request.Method, "Should equal HEAD method")
+	assert.Equal(t, 200, response.Response().StatusCode, "Should equal HTTP Status 200 (OK)")
+	assert.Empty(t, string(response.Body()), "Should be empty")
 }
