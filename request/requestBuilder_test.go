@@ -1,6 +1,7 @@
 package request
 
 import (
+	"encoding/base64"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -40,4 +41,33 @@ func TestRequestBuilderWithDefaultMethod(t *testing.T) {
 
 	assert.NotNil(t, r2, "Should not be nil")
 	assert.Equal(t, "GET", r2.Method, "Should equal GET method")
+}
+
+func TestRequestBuilderWithBasicAuth(t *testing.T) {
+	r1 := NewRequestBuilder().WithUrl(POSTMAN_ECHO_ROOT).WithBasicAuth("postman", "password").Build()
+
+	assert.NotNil(t, r1, "Should not be nil")
+
+	r2 := r1.getUnderlyingRequest()
+
+	assert.NotNil(t, r2, "Should not be nil")
+
+	basicAuthString := base64.StdEncoding.EncodeToString([]byte("postman:password"))
+	basicAuthString = "Basic " + basicAuthString
+
+	assert.Equal(t, basicAuthString, r2.Header.Get("Authorization"), "Should equal authorization header")
+}
+
+func TestRequestBuilderWithBearerAuth(t *testing.T) {
+	r1 := NewRequestBuilder().WithUrl(POSTMAN_ECHO_ROOT).WithBearerAuth(TEST_TOKEN).Build()
+
+	assert.NotNil(t, r1, "Should not be nil")
+
+	r2 := r1.getUnderlyingRequest()
+
+	assert.NotNil(t, r2, "Should not be nil")
+
+	bearerAuthString := "Bearer " + TEST_TOKEN
+
+	assert.Equal(t, bearerAuthString, r2.Header.Get("Authorization"), "Should equal authorization header")
 }

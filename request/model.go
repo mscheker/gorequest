@@ -32,6 +32,8 @@ type RequestBuilder interface {
 	WithHeader(name, value string) RequestBuilder
 	WithMethod(method string) RequestBuilder
 	WithUrl(url string) RequestBuilder
+	WithBasicAuth(username, password string) RequestBuilder
+	WithBearerAuth(token string) RequestBuilder
 }
 
 type RequestBuilderConstructor func() RequestBuilder
