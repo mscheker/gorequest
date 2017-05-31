@@ -32,7 +32,7 @@ func TestRequestBuilderWithUrl(t *testing.T) {
 	assert.Equal(t, POSTMAN_ECHO_ROOT, r2.URL.String(), "Should equal URL")
 }
 
-func TestRequestBuilderWithDefaultMethod(t *testing.T) {
+func TestRequestBuilderWithDefaults(t *testing.T) {
 	r1 := NewRequestBuilder().WithUrl(POSTMAN_ECHO_ROOT).Build()
 
 	assert.NotNil(t, r1, "Should not be nil")
@@ -41,6 +41,7 @@ func TestRequestBuilderWithDefaultMethod(t *testing.T) {
 
 	assert.NotNil(t, r2, "Should not be nil")
 	assert.Equal(t, "GET", r2.Method, "Should equal GET method")
+	assert.Empty(t, r2.Header.Get("Authorization"), "Should not have set authorization header")
 }
 
 func TestRequestBuilderWithBasicAuth(t *testing.T) {
