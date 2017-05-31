@@ -5,6 +5,12 @@ import (
 	"testing"
 )
 
+type testJsonStruct struct {
+	IntField    int    `json:"intField"`
+	StringField string `json:"stringField"`
+	BoolField   bool   `json:"boolField"`
+}
+
 const (
 	POSTMAN_ECHO_ROOT                = "https://postman-echo.com"
 	POSTMAN_ECHO_BASIC_AUTH_ENDPOINT = "https://postman-echo.com/basic-auth"

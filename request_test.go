@@ -1,6 +1,7 @@
 package gorequest
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -48,13 +49,39 @@ func TestPostRequestWithTextBody(t *testing.T) {
 	assert.Equal(t, "Hello World", string(r.Body()), "Should equal request body")
 }
 
-//func TestPostStringRequest(t *testing.T) {
-//	assert.True(t, false, "Not Implemented")
-//}
+func TestPostJsonRequest(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+		assert.Equal(t, "POST", req.Method, "Should equal request method")
+		assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "Should equal Content-Type header")
 
-//func TestPostJsonRequest(t *testing.T) {
-//	assert.True(t, false, "Not Implemented")
-//}
+		var s *testJsonStruct
+
+		decoder := json.NewDecoder(req.Body)
+
+		if err := decoder.Decode(&s); err != nil {
+			resp.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(resp, err.Error())
+		} else {
+			assert.Equal(t, 10, s.IntField, "Should equal IntField")
+			assert.Equal(t, "Hello World", s.StringField, "Should equal StringField")
+			assert.True(t, s.BoolField, "Should be true")
+
+			resp.WriteHeader(http.StatusOK)
+			fmt.Fprintf(resp, "OK")
+		}
+	}))
+
+	testJsonData := &testJsonStruct{
+		IntField:    10,
+		StringField: "Hello World",
+		BoolField:   true,
+	}
+
+	r := NewRequestBuilder().WithMethod("POST").WithUrl(ts.URL).WithJsonBody(testJsonData).Build().Do()
+
+	assert.NotNil(t, r, "Should not be nil")
+	assert.Equal(t, http.StatusOK, r.Response().StatusCode, "Should equal HTTP Status 200 (OK)")
+}
 
 //func TestPutRequest(t *testing.T) {
 //	assert.True(t, false, "Not Implemented")

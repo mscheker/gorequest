@@ -23,14 +23,14 @@ func (b *requestBuilder) WithUrl(url string) RequestBuilder {
 	return b
 }
 
-//func (b *requestBuilder) WithBody(body RequestBody) RequestBuilder {
-//	b.body = body
-
-//	return b
-//}
-
 func (b *requestBuilder) WithTextBody(data string) RequestBuilder {
 	b.body = newTextBody(data)
+
+	return b
+}
+
+func (b *requestBuilder) WithJsonBody(data interface{}) RequestBuilder {
+	b.body = newJsonBody(data)
 
 	return b
 }
