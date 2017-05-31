@@ -28,6 +28,7 @@ func TestGetRequest(t *testing.T) {
 func TestPostRequestWithTextBody(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 		assert.Equal(t, "POST", req.Method, "Should equal request method")
+		assert.Equal(t, "text/plain", req.Header.Get("Content-Type"), "Should equal Content-Type header")
 
 		defer req.Body.Close()
 
@@ -44,6 +45,7 @@ func TestPostRequestWithTextBody(t *testing.T) {
 
 	assert.NotNil(t, r, "Should not be nil")
 	assert.Equal(t, http.StatusOK, r.Response().StatusCode, "Should equal HTTP Status 200 (OK)")
+	assert.Equal(t, "Hello World", string(r.Body()), "Should equal request body")
 }
 
 //func TestPostStringRequest(t *testing.T) {
