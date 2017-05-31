@@ -5,7 +5,7 @@ package gorequest
  */
 
 import (
-	r "gorequest/request"
+	r "github.com/mscheker/gorequest/request"
 )
 
 /**
