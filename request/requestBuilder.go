@@ -119,7 +119,7 @@ func (b *requestBuilder) validate() {
 	// Section 4.3: A message-body MUST NOT be included in a request if the specification of the request method (section 5.1.1) does not allow sending an entity-body in requests.
 	// Section 5.2: The exact resource identified by an Internet request is determined by examining both the Request-URI and the Host header field.
 	// Section 9.3: The GET method means retrieve whatever information (in the form of an entity) is identified by the Request-URI.
-	// REMARKS: Ignore Body of a DELETE or HEAD requesst - RFC2616.
+	// REMARKS: Ignore Body of a DELETE and HEAD requests - RFC2616.
 	switch strings.ToUpper(b.method) {
 	case "POST":
 		b.method = "POST"
