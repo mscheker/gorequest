@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"net/http"
+	"regexp"
 	"strings"
 )
 
@@ -21,6 +22,20 @@ func (b *requestBuilder) WithUrl(url string) RequestBuilder {
 	b.url = url
 
 	return b
+}
+
+// REMARKS: The user/pwd can be provided in the URL when doing Basic Authentication (RFC 1738)
+func (b *requestBuilder) WithRFC1738(url string) RequestBuilder {
+	u, p, e := splitUserNamePassword(url)
+
+	// TODO: Panic ?
+	if e != nil {
+		panic(e)
+	}
+
+	b.url = url
+
+	return b.WithBasicAuth(u, p)
 }
 
 func (b *requestBuilder) WithTextBody(data string) RequestBuilder {
@@ -88,13 +103,23 @@ func (b *requestBuilder) Build() Request {
 	return newRequest(req)
 }
 
-func (b *requestBuilder) validate() {
+// ***********************************************
+// ********** Private methods/functions **********
+// ***********************************************
 
+func (b *requestBuilder) validate() {
 	if strings.Trim(b.url, " ") == "" {
 		panic(errors.New("URL is required."))
 	}
 
-	// validate method and synchronize the body
+	// REMARKS: Validate method and synchronize the body.
+	// REMARKS: For the time being, the Body of a GET request will be ignored. For more information, read below or refer to the HTTP Specification.
+	// REMARKS: There is a lot of ambiguity to suggest that most servers won't inspect the body of a GET request. Clients like Postman disable the Body tab when performing a GET request.
+	// Ref: https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html.
+	// Section 4.3: A message-body MUST NOT be included in a request if the specification of the request method (section 5.1.1) does not allow sending an entity-body in requests.
+	// Section 5.2: The exact resource identified by an Internet request is determined by examining both the Request-URI and the Host header field.
+	// Section 9.3: The GET method means retrieve whatever information (in the form of an entity) is identified by the Request-URI.
+	// REMARKS: Ignore Body of a DELETE or HEAD requesst - RFC2616.
 	switch strings.ToUpper(b.method) {
 	case "POST":
 		b.method = "POST"
@@ -109,5 +134,34 @@ func (b *requestBuilder) validate() {
 	default:
 		b.method = "GET"
 		b.body = nil
+	}
+}
+
+// REMARKS: The user/pwd can be provided in the URL when doing Basic Authentication (RFC 1738)
+func splitUserNamePassword(url string) (usr, pwd string, err error) {
+	reg, err := regexp.Compile("^(http|https|mailto)://")
+
+	if err != nil {
+		return "", "", err
+	}
+
+	s := reg.ReplaceAllString(url, "")
+
+	if !strings.Contains(s, "@") {
+		return "", "", errors.New("No credentials found in URI")
+	}
+
+	if reg, err := regexp.Compile("@(.+)"); err != nil {
+		return "", "", err
+	} else {
+		v := reg.ReplaceAllString(s, "")
+
+		c := strings.Split(v, ":")
+
+		if len(c) < 2 {
+			return "", "", errors.New("No credentials found in URI")
+		}
+
+		return c[0], c[1], nil
 	}
 }

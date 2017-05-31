@@ -30,6 +30,7 @@ type RequestBuilder interface {
 	Build() Request
 	WithTextBody(data string) RequestBuilder
 	WithJsonBody(data interface{}) RequestBuilder
+	WithRFC1738(url string) RequestBuilder
 	WithHeader(name, value string) RequestBuilder
 	WithMethod(method string) RequestBuilder
 	WithUrl(url string) RequestBuilder
