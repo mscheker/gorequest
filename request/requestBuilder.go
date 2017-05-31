@@ -23,8 +23,14 @@ func (b *requestBuilder) WithUrl(url string) RequestBuilder {
 	return b
 }
 
-func (b *requestBuilder) WithBody(body RequestBody) RequestBuilder {
-	b.body = body
+//func (b *requestBuilder) WithBody(body RequestBody) RequestBuilder {
+//	b.body = body
+
+//	return b
+//}
+
+func (b *requestBuilder) WithTextBody(data string) RequestBuilder {
+	b.body = newTextBody(data)
 
 	return b
 }

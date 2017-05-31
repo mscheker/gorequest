@@ -28,7 +28,8 @@ type RequestBody interface {
 
 type RequestBuilder interface {
 	Build() Request
-	WithBody(body RequestBody) RequestBuilder
+	//	WithBody(body RequestBody) RequestBuilder
+	WithTextBody(data string) RequestBuilder
 	WithHeader(name, value string) RequestBuilder
 	WithMethod(method string) RequestBuilder
 	WithUrl(url string) RequestBuilder

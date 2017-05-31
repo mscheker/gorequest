@@ -14,6 +14,13 @@ type requestBody struct {
 	data        *bytes.Buffer
 }
 
+func newTextBody(data string) RequestBody {
+	return &requestBody{
+		contentType: "text/plain",
+		data:        bytes.NewBuffer([]byte(data)),
+	}
+}
+
 func newJsonBody(data interface{}) RequestBody {
 
 	var buffer *bytes.Buffer

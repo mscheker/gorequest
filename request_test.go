@@ -2,6 +2,7 @@ package gorequest
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -22,6 +23,27 @@ func TestGetRequest(t *testing.T) {
 	assert.NotNil(t, r, "Should not be nil")
 	assert.Equal(t, http.StatusOK, r.Response().StatusCode, "Should equal HTTP Status 200 (OK)")
 	assert.Equal(t, "Hello World", string(r.Body()), "Should equal response body")
+}
+
+func TestPostRequestWithTextBody(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+		assert.Equal(t, "POST", req.Method, "Should equal request method")
+
+		defer req.Body.Close()
+
+		if b, err := ioutil.ReadAll(req.Body); err != nil {
+			resp.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(resp, err.Error())
+		} else {
+			resp.WriteHeader(http.StatusOK)
+			fmt.Fprintf(resp, string(b))
+		}
+	}))
+
+	r := NewRequestBuilder().WithMethod("POST").WithUrl(ts.URL).WithTextBody("Hello World").Build().Do()
+
+	assert.NotNil(t, r, "Should not be nil")
+	assert.Equal(t, http.StatusOK, r.Response().StatusCode, "Should equal HTTP Status 200 (OK)")
 }
 
 //func TestPostStringRequest(t *testing.T) {
