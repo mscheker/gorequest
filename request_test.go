@@ -18,6 +18,7 @@ func TestGetRequest(t *testing.T) {
 		resp.WriteHeader(http.StatusOK)
 		fmt.Fprintf(resp, "Hello World")
 	}))
+	defer ts.Close()
 
 	r := NewRequestBuilder().WithUrl(ts.URL).Build().Do()
 
@@ -41,6 +42,7 @@ func TestPostRequestWithTextBody(t *testing.T) {
 			fmt.Fprintf(resp, string(b))
 		}
 	}))
+	defer ts.Close()
 
 	r := NewRequestBuilder().WithMethod("POST").WithUrl(ts.URL).WithTextBody("Hello World").Build().Do()
 
@@ -70,6 +72,7 @@ func TestPostJsonRequest(t *testing.T) {
 			fmt.Fprintf(resp, "OK")
 		}
 	}))
+	defer ts.Close()
 
 	testJsonData := &testJsonStruct{
 		IntField:    10,
