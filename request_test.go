@@ -27,6 +27,22 @@ func TestGetRequest(t *testing.T) {
 	assert.Equal(t, "Hello World", string(r.Body()), "Should equal response body")
 }
 
+func TestGetRequestConvenienceMethod(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+		assert.Equal(t, "GET", req.Method, "Should equal request method")
+
+		resp.WriteHeader(http.StatusOK)
+		fmt.Fprintf(resp, "Hello World")
+	}))
+	defer ts.Close()
+
+	r := Get(ts.URL)
+
+	assert.NotNil(t, r, "Should not be nil")
+	assert.Equal(t, http.StatusOK, r.Response().StatusCode, "Should equal HTTP Status 200 (OK)")
+	assert.Equal(t, "Hello World", string(r.Body()), "Should equal response body")
+}
+
 func TestPostRequestWithTextBody(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 		assert.Equal(t, "POST", req.Method, "Should equal request method")
@@ -45,6 +61,30 @@ func TestPostRequestWithTextBody(t *testing.T) {
 	defer ts.Close()
 
 	r := NewRequestBuilder().WithMethod("POST").WithUrl(ts.URL).WithTextBody("Hello World").Build().Do()
+
+	assert.NotNil(t, r, "Should not be nil")
+	assert.Equal(t, http.StatusOK, r.Response().StatusCode, "Should equal HTTP Status 200 (OK)")
+	assert.Equal(t, "Hello World", string(r.Body()), "Should equal request body")
+}
+
+func TestPostTextRequestConvenienceMethod(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+		assert.Equal(t, "POST", req.Method, "Should equal request method")
+		assert.Equal(t, "text/plain", req.Header.Get("Content-Type"), "Should equal Content-Type header")
+
+		defer req.Body.Close()
+
+		if b, err := ioutil.ReadAll(req.Body); err != nil {
+			resp.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(resp, err.Error())
+		} else {
+			resp.WriteHeader(http.StatusOK)
+			fmt.Fprintf(resp, string(b))
+		}
+	}))
+	defer ts.Close()
+
+	r := PostText(ts.URL, "Hello World")
 
 	assert.NotNil(t, r, "Should not be nil")
 	assert.Equal(t, http.StatusOK, r.Response().StatusCode, "Should equal HTTP Status 200 (OK)")
