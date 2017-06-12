@@ -40,6 +40,7 @@ import (
 
 func main() {
 	resp := request.Get("https://www.google.com")
+	
 	fmt.Printf("Body: %s \n\r", string(resp.Body()))
 	fmt.Printf("Status: %s \n\r", resp.Response().Status)
 }
@@ -58,15 +59,10 @@ import (
 
 func main() {
 	resp := request.NewRequestBuilder().WithUrl("https://www.google.com").Build().Do()
+	
 	fmt.Printf("Body: %s \n\r", string(resp.Body()))
 	fmt.Printf("Status: %s \n\r", resp.Response().Status)
 }
-```
-
-```go
-builder := request.NewRequestBuilder().WithUrl("https://www.google.com")
-req := builder.Build()
-resp := req.Do()
 ```
 
 ## Request Builder Methods
