@@ -109,7 +109,7 @@ import (
 )
 
 func main() {
-	resp := request.NewRequestBuilder().WithUrl("https://postman:password@postman-echo.com/basic-auth").Build().Do()
+	resp := request.NewRequestBuilder().WithRFC1738("https://postman:password@postman-echo.com/basic-auth").Build().Do()
 
 	fmt.Printf("Body: %s \n\r", string(resp.Body()))
 	fmt.Printf("Status: %s \n\r", resp.Response().Status)
