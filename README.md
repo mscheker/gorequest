@@ -80,17 +80,12 @@ When building a request, the only required option is the URL; the method will de
 * `Auth` - A struct containing values for `username` and `password`, and `bearer` token.
 
 ## Authentication
-If passed as an option, `Auth` is a struct containing the values:
-* `Username`
-* `Password`
-* `Bearer` (Optional)
-```go
-// username, password, bearer
-func NewAuth(vals ...string) *auth {...}
-```
+The builder exposes various methods for the different authentication mechanisms that are supported:
+* Basic Authentication
+* Bearer Authentication
 
 ### Basic Authentication
-Basic authentication is supported, and it is set when a `username` and `password` are provided as part of the `Auth` option.
+Basic authentication is supported, and it is set when a `username` and `password` are provided as part of the `WithBasicAuth` method.
 ```go
 package main
 
@@ -101,16 +96,10 @@ import (
 )
 
 func main() {
-	options := &request.Option{
-		Url:    "https://postman-echo.com/basic-auth",
-		Method: "GET",
-		Auth:   request.NewAuth("postman", "password"),
-	}
-	resp, body, err := request.NewRequest(options)
+	resp := request.NewRequestBuilder().WithUrl("https://postman-echo.com/basic-auth").WithBasicAuth("postman", "password").Build().Do()
 
-	fmt.Printf("Response: %v \n\r", resp)
-	fmt.Printf("Body: %s \n\r", string(body))
-	fmt.Printf("Error: %v \n\r", err)
+	fmt.Printf("Body: %s \n\r", string(resp.Body()))
+	fmt.Printf("Status: %s \n\r", resp.Response().Status)
 }
 ```
 You can also specify basic authentication using the URL itself, as detailed in [RFC 1738](http://www.ietf.org/rfc/rfc1738.txt).
@@ -124,20 +113,15 @@ import (
 )
 
 func main() {
-	options := &request.Option{
-		Url:    "https://postman:password@postman-echo.com/basic-auth",
-		Method: "GET",
-	}
-	resp, body, err := request.NewRequest(options)
+	resp := request.NewRequestBuilder().WithUrl("https://postman:password@postman-echo.com/basic-auth").Build().Do()
 
-	fmt.Printf("Response: %v \n\r", resp)
-	fmt.Printf("Body: %s \n\r", string(body))
-	fmt.Printf("Error: %v \n\r", err)
+	fmt.Printf("Body: %s \n\r", string(resp.Body()))
+	fmt.Printf("Status: %s \n\r", resp.Response().Status)
 }
 ```
 
 ### Bearer Authentication
-Bearer authentication is supported, and it is set when the `bearer` value is provided as part of the `Auth` option.
+Bearer authentication is supported, and it is set when the `bearer` value is provided as part of the `WithBearerAuth` method.
 ```go
 package main
 
@@ -148,16 +132,10 @@ import (
 )
 
 func main() {
-	options := &request.Option{
-		Url:    "https://your_endpoint",
-		Method: "GET",
-		Auth:   request.NewAuth("", "", "your_bearer_token"),
-	}
-	resp, body, err := request.NewRequest(options)
+	resp := request.NewRequestBuilder().WithUrl("https://your_endpoint").WithBearerAuth("your_bearer_token").Build().Do()
 
-	fmt.Printf("Response: %v \n\r", resp)
-	fmt.Printf("Body: %s \n\r", string(body))
-	fmt.Printf("Error: %v \n\r", err)
+	fmt.Printf("Body: %s \n\r", string(resp.Body()))
+	fmt.Printf("Status: %s \n\r", resp.Response().Status)
 }
 ```
 
