@@ -14,10 +14,10 @@ $ go get github.com/mscheker/gorequest
 
 ## Table of Contents
 [Simple to Use](#simple-to-use)
-* [With URL](#with-url---defaults-to-method-get)
-* [With Options](#with-options)
+* [With Convenience Methods](#with-convenience-methods)
+* [With Request Builder](#with-request-builder)
 
-[Options](#options)
+[Request Builder Methods](#request-builder-methods)
 
 [Authentication](#authentication)
 * [Basic Authentication](#basic-authentication)
@@ -28,6 +28,7 @@ $ go get github.com/mscheker/gorequest
 [Credits](#credits)
 
 ## Simple to Use
+## With Convenience Methods
 ```go
 package main
 
@@ -44,6 +45,7 @@ func main() {
 }
 ```
 
+## With Request Builder
 If you need more control when making requests, the package exposes a constructor for a `RequestBuilder` object.
 ```go
 package main
@@ -61,14 +63,14 @@ func main() {
 }
 ```
 
-## RequestBuilder Options
 ```go
 builder := request.NewRequestBuilder().WithUrl("https://www.google.com")
 req := builder.Build()
 resp := req.Do()
 ```
-When building a request, the only required option is the URL; the method will default to `GET` if none is specified.
 
+## Request Builder Methods
+When building a request, the only required option is the URL; the method will default to `GET` if none is specified.
 
 * `Url` - Fully qualified URL.
 * `Method` - HTTP method (Defaults to "GET").
