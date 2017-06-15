@@ -68,17 +68,24 @@ func main() {
 ## Request Builder Methods
 When building a request, the only required option is the URL; the method will default to `GET` if none is specified.
 
-* `Url` - Fully qualified URL.
-* `Method` - HTTP method (Defaults to "GET").
-* `Headers` - HTTP headers (Defaults to an empty map).
-* `Body` - Entity body for POST and PUT requests. Must be a string or struct. If JSON is true, Body must be a JSON serializable struct or a valid JSON formatted string. `Body is ignored for GET and DELETE requests`.
-* `JSON` - A JSON serializable struct or a valid JSON formatted string. Sets the Body to a JSON representation of the data and sets the `Content-Type header to application/json`. If set to true, it will attempt to serialize the Body.
-* `Auth` - A struct containing values for `username` and `password`, and `bearer` token.
+* `WithUrl` - Fully qualified URL.
+* `WithRFC1738` - Full qualified URL with `username` and `password` for `Basic Authentication`.
+* `WithMethod` - HTTP method (Defaults to "GET").
+* `WithHeader` - HTTP header (Defaults to an empty map).
+* `WithTextBody` - Body for POST and PUT requests. Must be a string. `Content-Type` header is set to `text/plain`.
+* `WithJsonBody` - Body for POST and PUT requests. Must be a valid JSON formatted string or a JSON serializable struct. `Content-Type` header is set to `application/json`.
+* `WithBasicAuth` - Generates a Base64 encoded string from the `username` and `password` specified, and sets the `Authorization` header to `Basic <encoded_string>` accordingly.
+* `WithBearerAuth` - Sets the `Authorization` header to `Bearer <your_bearer_token>` accordingly.
+* `Build` - Builds a request object with the specified options. Will panic if a `URL` has not been set.
+
+```
+Note: Body is ignored for GET, DELETE and HEAD requests.
+```
 
 ## Authentication
 The builder exposes various methods for the different authentication mechanisms that are supported:
-* Basic Authentication
-* Bearer Authentication
+* Basic
+* Bearer
 
 ### Basic Authentication
 Basic authentication is supported, and it is set when a `username` and `password` are provided as part of the `WithBasicAuth` method.
