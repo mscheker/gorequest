@@ -146,14 +146,15 @@ func main() {
 
 There are methods for each different HTTP Verb; these methods are similar to NewRequest() but the method field is set for you:
 
-* request.Get() - Defaults to method: "GET"
-* request.PostText() - Defaults to method: "POST" and Content-Type: "text/plain"
-* request.PostJson() - Defaults to method: "POST" and Content-Type: "application/json"
-* request.PutText() - Defaults to method: "PUT" and Content-Type: "text/plain"
-* request.PutJson() - Defaults to method: "PUT" and Content-Type: "application/json"
-* request.Delete() - Defaults to method: "DELETE"
-* request.Head() - Defaults to method: "HEAD"
+* request.Get() - Defaults to method: "GET".
+* request.PostText() - Defaults to method: "POST" and Content-Type: "text/plain".
+* request.PostJson() - Defaults to method: "POST" and Content-Type: "application/json".
+* request.PutText() - Defaults to method: "PUT" and Content-Type: "text/plain".
+* request.PutJson() - Defaults to method: "PUT" and Content-Type: "application/json".
+* request.Delete() - Defaults to method: "DELETE".
+* request.Head() - Defaults to method: "HEAD".
 
 ## Credits
 * [Postman Echo](https://docs.postman-echo.com) for providing a service to test REST clients, API calls, and various auth mechanisms.
 * To the team behind the Node.js [request](https://github.com/request/request) module for implementing a robust yet simple to use library which is the inspiration for this package.
+* To [Demian Lessa](https://github.com/demianlessa) for contributing with the revised design and refactoring of the package.
