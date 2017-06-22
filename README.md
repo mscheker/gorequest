@@ -144,7 +144,7 @@ func main() {
 
 ## Convenience Methods
 
-There are methods for each different HTTP Verb; the method field is set for you. In the PostText, PostJson, PutText and PostJson methods, the Content-Type header is set accordingly:
+There are methods for each different HTTP Verb; the method field is set for you. In the PostText, PostJson, PutText and PutJson methods, the Content-Type header is set accordingly:
 
 * request.Get() - Defaults to method: "GET".
 * request.PostText() - Defaults to method: "POST" and Content-Type: "text/plain".
