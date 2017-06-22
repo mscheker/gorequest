@@ -33,16 +33,16 @@ $ go get github.com/mscheker/gorequest
 package main
 
 import (
-	"fmt"
+    "fmt"
 
-	request "github.com/mscheker/gorequest"
+    request "github.com/mscheker/gorequest"
 )
 
 func main() {
-	resp := request.Get("https://www.google.com")
-	
-	fmt.Printf("Body: %s \n\r", string(resp.Body()))
-	fmt.Printf("Status: %s \n\r", resp.Response().Status)
+    resp := request.Get("https://www.google.com")
+    
+    fmt.Printf("Body: %s \n\r", string(resp.Body()))
+    fmt.Printf("Status: %s \n\r", resp.Response().Status)
 }
 ```
 
@@ -52,16 +52,16 @@ If you need more control when making requests, the package exposes a constructor
 package main
 
 import (
-	"fmt"
+    "fmt"
 
-	request "github.com/mscheker/gorequest"
+    request "github.com/mscheker/gorequest"
 )
 
 func main() {
-	resp := request.NewRequestBuilder().WithUrl("https://www.google.com").Build().Do()
-	
-	fmt.Printf("Body: %s \n\r", string(resp.Body()))
-	fmt.Printf("Status: %s \n\r", resp.Response().Status)
+    resp := request.NewRequestBuilder().WithUrl("https://www.google.com").Build().Do()
+    
+    fmt.Printf("Body: %s \n\r", string(resp.Body()))
+    fmt.Printf("Status: %s \n\r", resp.Response().Status)
 }
 ```
 
@@ -93,16 +93,16 @@ Basic authentication is supported, and it is set when a `username` and `password
 package main
 
 import (
-	"fmt"
+    "fmt"
 
-	request "github.com/mscheker/gorequest"
+    request "github.com/mscheker/gorequest"
 )
 
 func main() {
-	resp := request.NewRequestBuilder().WithUrl("https://postman-echo.com/basic-auth").WithBasicAuth("postman", "password").Build().Do()
+    resp := request.NewRequestBuilder().WithUrl("https://postman-echo.com/basic-auth").WithBasicAuth("postman", "password").Build().Do()
 
-	fmt.Printf("Body: %s \n\r", string(resp.Body()))
-	fmt.Printf("Status: %s \n\r", resp.Response().Status)
+    fmt.Printf("Body: %s \n\r", string(resp.Body()))
+    fmt.Printf("Status: %s \n\r", resp.Response().Status)
 }
 ```
 You can also specify basic authentication using the URL itself, as detailed in [RFC 1738](http://www.ietf.org/rfc/rfc1738.txt).
@@ -110,16 +110,16 @@ You can also specify basic authentication using the URL itself, as detailed in [
 package main
 
 import (
-	"fmt"
+    "fmt"
 
-	request "github.com/mscheker/gorequest"
+    request "github.com/mscheker/gorequest"
 )
 
 func main() {
-	resp := request.NewRequestBuilder().WithRFC1738("https://postman:password@postman-echo.com/basic-auth").Build().Do()
+    resp := request.NewRequestBuilder().WithRFC1738("https://postman:password@postman-echo.com/basic-auth").Build().Do()
 
-	fmt.Printf("Body: %s \n\r", string(resp.Body()))
-	fmt.Printf("Status: %s \n\r", resp.Response().Status)
+    fmt.Printf("Body: %s \n\r", string(resp.Body()))
+    fmt.Printf("Status: %s \n\r", resp.Response().Status)
 }
 ```
 
@@ -129,16 +129,16 @@ Bearer authentication is supported, and it is set when the `bearer` value is pro
 package main
 
 import (
-	"fmt"
+    "fmt"
 
-	request "github.com/mscheker/gorequest"
+    request "github.com/mscheker/gorequest"
 )
 
 func main() {
-	resp := request.NewRequestBuilder().WithUrl("https://your_endpoint").WithBearerAuth("your_bearer_token").Build().Do()
+    resp := request.NewRequestBuilder().WithUrl("https://your_endpoint").WithBearerAuth("your_bearer_token").Build().Do()
 
-	fmt.Printf("Body: %s \n\r", string(resp.Body()))
-	fmt.Printf("Status: %s \n\r", resp.Response().Status)
+    fmt.Printf("Body: %s \n\r", string(resp.Body()))
+    fmt.Printf("Status: %s \n\r", resp.Response().Status)
 }
 ```
 

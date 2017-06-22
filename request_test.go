@@ -127,11 +127,11 @@ func TestPostJsonRequest(t *testing.T) {
 }
 
 //func TestPutRequest(t *testing.T) {
-//	assert.True(t, false, "Not Implemented")
+//  assert.True(t, false, "Not Implemented")
 //}
 
 //func TestDeleteRequest(t *testing.T) {
-//	assert.True(t, false, "Not Implemented")
+//  assert.True(t, false, "Not Implemented")
 //}
 
 func TestBasicAuthentication(t *testing.T) {
