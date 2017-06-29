@@ -14,10 +14,10 @@ $ go get github.com/mscheker/gorequest
 
 ## Table of Contents
 [Simple to Use](#simple-to-use)
-* [With URL](#with-url---defaults-to-method-get)
-* [With Options](#with-options)
+* [With Convenience Methods](#with-convenience-methods)
+* [With Request Builder](#with-request-builder)
 
-[Options](#options)
+[Request Builder Methods](#request-builder-methods)
 
 [Authentication](#authentication)
 * [Basic Authentication](#basic-authentication)
@@ -28,102 +28,81 @@ $ go get github.com/mscheker/gorequest
 [Credits](#credits)
 
 ## Simple to Use
-### With URL - Defaults to method: GET
+## With Convenience Methods
 ```go
 package main
 
 import (
-	"fmt"
-	
-	request "github.com/mscheker/gorequest"
+    "fmt"
+
+    request "github.com/mscheker/gorequest"
 )
 
 func main() {
-	resp, body, err := request.NewRequest("https://www.google.com")
-	
-	fmt.Printf("Response: %v \n\r", resp)
-	fmt.Printf("Body: %s \n\r", string(body))
-	fmt.Printf("Error: %v \n\r", err)
+    resp := request.Get("https://www.google.com")
+    
+    fmt.Printf("Body: %s \n\r", string(resp.Body()))
+    fmt.Printf("Status: %s \n\r", resp.Response().Status)
 }
 ```
 
-### With Options
+## With Request Builder
+If you need more control when making requests, the package exposes a constructor for a `RequestBuilder` object.
 ```go
 package main
 
 import (
-	"fmt"
+    "fmt"
 
-	request "github.com/mscheker/gorequest"
+    request "github.com/mscheker/gorequest"
 )
 
 func main() {
-	options := &request.Option{
-		Url:    "https://www.google.com",
-		Method: "GET",
-	}
-	resp, body, err := request.NewRequest(options)
-
-	fmt.Printf("Response: %v \n\r", resp)
-	fmt.Printf("Body: %s \n\r", string(body))
-	fmt.Printf("Error: %v \n\r", err)
+    resp := request.NewRequestBuilder().WithUrl("https://www.google.com").Build().Do()
+    
+    fmt.Printf("Body: %s \n\r", string(resp.Body()))
+    fmt.Printf("Status: %s \n\r", resp.Response().Status)
 }
 ```
 
-## Options
-```go
-func NewRequest(val interface{}) (*http.Response, []byte, error) {...}
+## Request Builder Methods
+When building a request, the only required option is the URL; the method will default to `GET` if none is specified.
+
+* `WithUrl` - Fully qualified URL.
+* `WithRFC1738` - Full qualified URL with `username` and `password` for `Basic Authentication`.
+* `WithMethod` - HTTP method (Defaults to "GET").
+* `WithHeader` - HTTP header (Defaults to an empty map).
+* `WithTextBody` - Body for POST and PUT requests. Must be a string. `Content-Type` header is set to `text/plain`.
+* `WithJsonBody` - Body for POST and PUT requests. Must be a valid JSON formatted string or a JSON serializable struct. `Content-Type` header is set to `application/json`.
+* `WithBasicAuth` - Generates a Base64 encoded string from the `username` and `password` specified, and sets the `Authorization` header to `Basic <encoded_string>` accordingly.
+* `WithBearerAuth` - Sets the `Authorization` header to `Bearer <your_bearer_token>` accordingly.
+* `Build` - Builds a request object with the specified options. Will panic if a `URL` has not been set.
+
 ```
-The argument can be either a URL or an options struct. The only required option is URL; all others are optional.
-```go
-type Option struct {
-	Url     string
-	Headers map[string]string
-	Auth    *auth
-	Body    interface{}
-	JSON    interface{}
-	Method  string
-}
+Note: Body is ignored for GET, DELETE and HEAD requests.
 ```
-* `Url` - Fully qualified URL.
-* `Method` - HTTP method (Defaults to "GET").
-* `Headers` - HTTP headers (Defaults to an empty map).
-* `Body` - Entity body for POST and PUT requests. Must be a string or struct. If JSON is true, Body must be a JSON serializable struct or a valid JSON formatted string. `Body is ignored for GET and DELETE requests`.
-* `JSON` - A JSON serializable struct or a valid JSON formatted string. Sets the Body to a JSON representation of the data and sets the `Content-Type header to application/json`. If set to true, it will attempt to serialize the Body.
-* `Auth` - A struct containing values for `username` and `password`, and `bearer` token.
 
 ## Authentication
-If passed as an option, `Auth` is a struct containing the values:
-* `Username`
-* `Password`
-* `Bearer` (Optional)
-```go
-// username, password, bearer
-func NewAuth(vals ...string) *auth {...}
-```
+The builder exposes various methods for the different authentication mechanisms that are supported:
+* Basic
+* Bearer
 
 ### Basic Authentication
-Basic authentication is supported, and it is set when a `username` and `password` are provided as part of the `Auth` option.
+Basic authentication is supported, and it is set when a `username` and `password` are provided as part of the `WithBasicAuth` method.
 ```go
 package main
 
 import (
-	"fmt"
+    "fmt"
 
-	request "github.com/mscheker/gorequest"
+    request "github.com/mscheker/gorequest"
 )
 
 func main() {
-	options := &request.Option{
-		Url:    "https://postman-echo.com/basic-auth",
-		Method: "GET",
-		Auth:   request.NewAuth("postman", "password"),
-	}
-	resp, body, err := request.NewRequest(options)
+    resp := request.NewRequestBuilder().WithUrl("https://postman-echo.com/basic-auth").WithBasicAuth("postman", "password").Build().Do()
 
-	fmt.Printf("Response: %v \n\r", resp)
-	fmt.Printf("Body: %s \n\r", string(body))
-	fmt.Printf("Error: %v \n\r", err)
+    fmt.Printf("Body: %s \n\r", string(resp.Body()))
+    fmt.Printf("Status: %s \n\r", resp.Response().Status)
 }
 ```
 You can also specify basic authentication using the URL itself, as detailed in [RFC 1738](http://www.ietf.org/rfc/rfc1738.txt).
@@ -131,59 +110,51 @@ You can also specify basic authentication using the URL itself, as detailed in [
 package main
 
 import (
-	"fmt"
+    "fmt"
 
-	request "github.com/mscheker/gorequest"
+    request "github.com/mscheker/gorequest"
 )
 
 func main() {
-	options := &request.Option{
-		Url:    "https://postman:password@postman-echo.com/basic-auth",
-		Method: "GET",
-	}
-	resp, body, err := request.NewRequest(options)
+    resp := request.NewRequestBuilder().WithRFC1738("https://postman:password@postman-echo.com/basic-auth").Build().Do()
 
-	fmt.Printf("Response: %v \n\r", resp)
-	fmt.Printf("Body: %s \n\r", string(body))
-	fmt.Printf("Error: %v \n\r", err)
+    fmt.Printf("Body: %s \n\r", string(resp.Body()))
+    fmt.Printf("Status: %s \n\r", resp.Response().Status)
 }
 ```
 
 ### Bearer Authentication
-Bearer authentication is supported, and it is set when the `bearer` value is provided as part of the `Auth` option.
+Bearer authentication is supported, and it is set when the `bearer` value is provided as part of the `WithBearerAuth` method.
 ```go
 package main
 
 import (
-	"fmt"
+    "fmt"
 
-	request "github.com/mscheker/gorequest"
+    request "github.com/mscheker/gorequest"
 )
 
 func main() {
-	options := &request.Option{
-		Url:    "https://your_endpoint",
-		Method: "GET",
-		Auth:   request.NewAuth("", "", "your_bearer_token"),
-	}
-	resp, body, err := request.NewRequest(options)
+    resp := request.NewRequestBuilder().WithUrl("https://your_endpoint").WithBearerAuth("your_bearer_token").Build().Do()
 
-	fmt.Printf("Response: %v \n\r", resp)
-	fmt.Printf("Body: %s \n\r", string(body))
-	fmt.Printf("Error: %v \n\r", err)
+    fmt.Printf("Body: %s \n\r", string(resp.Body()))
+    fmt.Printf("Status: %s \n\r", resp.Response().Status)
 }
 ```
 
 ## Convenience Methods
 
-There are methods for each different HTTP Verb; these methods are similar to NewRequest() but the method field is set for you:
+There are methods for each different HTTP Verb; the method field is set for you. In the PostText, PostJson, PutText and PutJson methods, the Content-Type header is set accordingly:
 
-* request.Get() - Defaults to method: "GET"
-* request.Post() - Defaults to method: "POST"
-* request.Put() - Defaults to method: "PUT"
-* request.Delete() - Defaults to method: "DELETE"
-* request.Head() - Defaults to method: "HEAD"
+* request.Get() - Defaults to method: "GET".
+* request.PostText() - Defaults to method: "POST" and Content-Type: "text/plain".
+* request.PostJson() - Defaults to method: "POST" and Content-Type: "application/json".
+* request.PutText() - Defaults to method: "PUT" and Content-Type: "text/plain".
+* request.PutJson() - Defaults to method: "PUT" and Content-Type: "application/json".
+* request.Delete() - Defaults to method: "DELETE".
+* request.Head() - Defaults to method: "HEAD".
 
 ## Credits
 * [Postman Echo](https://docs.postman-echo.com) for providing a service to test REST clients, API calls, and various auth mechanisms.
 * To the team behind the Node.js [request](https://github.com/request/request) module for implementing a robust yet simple to use library which is the inspiration for this package.
+* To [Demian Lessa](https://github.com/demianlessa) for contributing with the revised design and refactoring of the package.
