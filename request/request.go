@@ -7,11 +7,13 @@ import (
 
 type request struct {
 	request *http.Request
+	client  *http.Client
 }
 
-func newRequest(req *http.Request) Request {
+func newRequest(req *http.Request, client *http.Client) Request {
 	return &request{
 		request: req,
+		client:  client,
 	}
 }
 
@@ -19,10 +21,12 @@ func (r *request) getUnderlyingRequest() *http.Request {
 	return r.request
 }
 
-func (r *request) Do() Response {
-	client := getDefaultHttpClient()
+func (r *request) getUnderlyingHttpClient() *http.Client {
+	return r.client
+}
 
-	resp, err := client.Do(r.request)
+func (r *request) Do() Response {
+	resp, err := r.client.Do(r.request)
 
 	defer resp.Body.Close()
 
