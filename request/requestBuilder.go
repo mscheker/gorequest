@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 )
 
 // TODO: Document
@@ -16,6 +17,7 @@ type requestBuilder struct {
 	headers map[string]string
 	method  string
 	url     string
+	timeout time.Duration
 }
 
 func (b *requestBuilder) WithUrl(url string) RequestBuilder {
@@ -74,6 +76,12 @@ func (b *requestBuilder) WithBearerAuth(token string) RequestBuilder {
 	return b
 }
 
+func (b *requestBuilder) WithTimeout(timeout time.Duration) RequestBuilder {
+	b.timeout = timeout
+
+	return b
+}
+
 func (b *requestBuilder) Build() Request {
 	b.validate()
 
@@ -100,7 +108,10 @@ func (b *requestBuilder) Build() Request {
 		req.Header.Add(k, v)
 	}
 
-	return newRequest(req)
+	// REMARKS: Initialize HTTP Client
+	client := newHttpClient(b.timeout)
+
+	return newRequest(req, client)
 }
 
 // ***********************************************

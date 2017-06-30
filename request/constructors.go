@@ -12,26 +12,16 @@ func NewRequestBuilder() RequestBuilder {
 		auth:    newAuthNone(),
 		headers: make(map[string]string),
 		method:  defaultMethod,
+		timeout: defaultTimeout,
 	}
 }
 
-func getDefaultHttpClient() *http.Client {
-	if httpClient == nil {
-		httpClient = &http.Client{
-			Timeout: defaultTimeout,
-		}
-	}
-
-	return httpClient
-}
-
-func getHttpClient(timeout time.Duration) *http.Client {
+func newHttpClient(timeout time.Duration) *http.Client {
 	return &http.Client{
-		Timeout: timeout * time.Second,
+		Timeout: timeout,
 	}
 }
 
-var httpClient *http.Client
 var defaultAuthorization AuthorizationMethod = newAuthNone()
 var defaultMethod string = "GET"
 var defaultTimeout time.Duration = 30 * time.Second

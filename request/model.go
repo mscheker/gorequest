@@ -3,6 +3,7 @@ package request
 import (
 	"bytes"
 	"net/http"
+	"time"
 )
 
 // TODO: Document interfaces
@@ -10,6 +11,7 @@ import (
 type Request interface {
 	Do() Response
 	getUnderlyingRequest() *http.Request
+	getUnderlyingHttpClient() *http.Client
 }
 
 type Response interface {
@@ -36,6 +38,7 @@ type RequestBuilder interface {
 	WithUrl(url string) RequestBuilder
 	WithBasicAuth(username, password string) RequestBuilder
 	WithBearerAuth(token string) RequestBuilder
+	WithTimeout(timeout time.Duration) RequestBuilder
 }
 
 type RequestBuilderConstructor func() RequestBuilder

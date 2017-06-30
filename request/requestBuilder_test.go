@@ -3,6 +3,7 @@ package request
 import (
 	"encoding/base64"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -71,4 +72,26 @@ func TestRequestBuilderWithBearerAuth(t *testing.T) {
 	bearerAuthString := "Bearer " + TEST_TOKEN
 
 	assert.Equal(t, bearerAuthString, r2.Header.Get("Authorization"), "Should equal authorization header")
+}
+
+func TestRequestBuilderWithDefaultTimeout(t *testing.T) {
+	r1 := NewRequestBuilder().WithUrl(POSTMAN_ECHO_ROOT).Build()
+
+	assert.NotNil(t, r1, "Should not be nil")
+
+	c := r1.getUnderlyingHttpClient()
+
+	assert.NotNil(t, c, "Should not be nil")
+	assert.Equal(t, 30*time.Second, c.Timeout, "Should equal 30 seconds")
+}
+
+func TestRequestBuilderWithTimeout(t *testing.T) {
+	r1 := NewRequestBuilder().WithUrl(POSTMAN_ECHO_ROOT).WithTimeout(45 * time.Second).Build()
+
+	assert.NotNil(t, r1, "Should not be nil")
+
+	c := r1.getUnderlyingHttpClient()
+
+	assert.NotNil(t, c, "Should not be nil")
+	assert.Equal(t, 45*time.Second, c.Timeout, "Should equal 45 seconds")
 }
