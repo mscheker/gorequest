@@ -76,6 +76,12 @@ func (b *requestBuilder) WithBearerAuth(token string) RequestBuilder {
 	return b
 }
 
+func (b *requestBuilder) WithDigestAuth(username, password string) RequestBuilder {
+	b.auth = newAuthDigest(username, password)
+
+	return b
+}
+
 func (b *requestBuilder) WithTimeout(timeout time.Duration) RequestBuilder {
 	b.timeout = timeout
 
@@ -98,8 +104,6 @@ func (b *requestBuilder) Build() Request {
 		panic(err)
 	}
 
-	b.auth.Configure(req)
-
 	for k, v := range b.headers {
 		if req.Header.Get(k) != "" {
 			continue
@@ -111,7 +115,7 @@ func (b *requestBuilder) Build() Request {
 	// REMARKS: Initialize HTTP Client
 	client := newHttpClient(b.timeout)
 
-	return newRequest(req, client)
+	return newRequest(req, client, b.auth)
 }
 
 // ***********************************************

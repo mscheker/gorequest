@@ -6,6 +6,15 @@ import (
 	"time"
 )
 
+type authScheme int
+
+const (
+	AUTH_NONE authScheme = iota
+	AUTH_BASIC
+	AUTH_BEARER
+	AUTH_DIGEST
+)
+
 // TODO: Document interfaces
 
 type Request interface {
@@ -21,6 +30,7 @@ type Response interface {
 
 type AuthorizationMethod interface {
 	Configure(request *http.Request)
+	getScheme() authScheme
 }
 
 type RequestBody interface {
@@ -38,6 +48,7 @@ type RequestBuilder interface {
 	WithUrl(url string) RequestBuilder
 	WithBasicAuth(username, password string) RequestBuilder
 	WithBearerAuth(token string) RequestBuilder
+	WithDigestAuth(username, password string) RequestBuilder
 	WithTimeout(timeout time.Duration) RequestBuilder
 }
 

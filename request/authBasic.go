@@ -17,3 +17,7 @@ func newAuthBasic(username, password string) AuthorizationMethod {
 func (a *authBasic) Configure(request *http.Request) {
 	request.SetBasicAuth(a.username, a.password)
 }
+
+func (a *authBasic) getScheme() authScheme {
+	return AUTH_BASIC
+}

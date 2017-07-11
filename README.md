@@ -22,6 +22,7 @@ $ go get github.com/mscheker/gorequest
 [Authentication](#authentication)
 * [Basic Authentication](#basic-authentication)
 * [Bearer Authentication](#bearer-authentication)
+* [Digest Authentication](#digest-authentication)
 
 [Convenience Methods](#convenience-methods)
 
@@ -87,9 +88,10 @@ Note: Body is ignored for GET, DELETE and HEAD requests.
 The builder exposes various methods for the different authentication mechanisms that are supported:
 * Basic
 * Bearer
+* Digest
 
 ### Basic Authentication
-Basic authentication is supported, and it is set when a `username` and `password` are provided as part of the `WithBasicAuth` method.
+Basic authentication is supported, and it is set when a `username` and `password` is provided as part of the `WithBasicAuth` method.
 ```go
 package main
 
@@ -137,6 +139,25 @@ import (
 
 func main() {
     resp := request.NewRequestBuilder().WithUrl("https://your_endpoint").WithBearerAuth("your_bearer_token").Build().Do()
+
+    fmt.Printf("Body: %s \n\r", string(resp.Body()))
+    fmt.Printf("Status: %s \n\r", resp.Response().Status)
+}
+```
+
+### Digest Authentication
+Digest authentication is supported, and it is set when a `username` and `password` is provided as part of the `WithDigestAuth` method. Upon detecting a `401 (Unauthorized)` in the initial response, the request is sent again with the hashed Digest Authorization header.
+```go
+package main
+
+import (
+    "fmt"
+
+    request "github.com/mscheker/gorequest"
+)
+
+func main() {
+    resp := request.NewRequestBuilder().WithMethod("GET").WithUrl("https://postman-echo.com/digest-auth").WithDigestAuth("postman", "password").Build().Do()
 
     fmt.Printf("Body: %s \n\r", string(resp.Body()))
     fmt.Printf("Status: %s \n\r", resp.Response().Status)

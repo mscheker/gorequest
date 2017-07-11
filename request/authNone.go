@@ -12,3 +12,7 @@ func newAuthNone() AuthorizationMethod {
 func (a *authNone) Configure(request *http.Request) {
 
 }
+
+func (a *authNone) getScheme() authScheme {
+	return AUTH_NONE
+}
