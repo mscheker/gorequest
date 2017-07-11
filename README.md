@@ -77,6 +77,7 @@ When building a request, the only required option is the URL; the method will de
 * `WithJsonBody` - Body for POST and PUT requests. Must be a valid JSON formatted string or a JSON serializable struct. `Content-Type` header is set to `application/json`.
 * `WithBasicAuth` - Generates a Base64 encoded string from the `username` and `password` specified, and sets the `Authorization` header to `Basic <encoded_string>` accordingly.
 * `WithBearerAuth` - Sets the `Authorization` header to `Bearer <your_bearer_token>` accordingly.
+* `WithDigestAuth` - Generates the necessary MD5 hash and nonce values, and sets the hashed Digest `Authorization` header accordingly before resending the request.
 * `WithTimeout` - Sets the time limit for requests made by the HTTP client. Defaults to `30 seconds`.
 * `Build` - Builds a request object with the specified options. Will panic if a `URL` has not been set.
 
