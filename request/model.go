@@ -39,6 +39,9 @@ type RequestBuilder interface {
 	WithBasicAuth(username, password string) RequestBuilder
 	WithBearerAuth(token string) RequestBuilder
 	WithTimeout(timeout time.Duration) RequestBuilder
+	WithCheckRedirect(checkRedirect func(req *http.Request, via []*http.Request) error) RequestBuilder
 }
 
 type RequestBuilderConstructor func() RequestBuilder
+
+//type CheckRedirectFunc func(req *http.Request, via []*http.Request)
