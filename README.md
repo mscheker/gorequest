@@ -163,7 +163,7 @@ func main() {
         return nil
     }
 
-    resp := NewRequestBuilder().WithUrl(ts.URL).WithCheckRedirect(redirectPol).Build().Do()
+    resp := NewRequestBuilder().WithUrl("https://postman-echo.com/get").WithCheckRedirect(redirectPol).Build().Do()
 
     fmt.Printf("Body: %s \n\r", string(resp.Body()))
     fmt.Printf("Status: %s \n\r", resp.Response().Status)
