@@ -157,13 +157,13 @@ import (
 )
 
 func main() {
-	redirectPol := func(req *http.Request, via []*http.Request) error {
-		// Your code here...
-		
-		return nil
-	}
-	
-	resp := NewRequestBuilder().WithUrl(ts.URL).WithCheckRedirect(redirectPol).Build().Do()
+    redirectPol := func(req *http.Request, via []*http.Request) error {
+        // Your code here...
+
+        return nil
+    }
+
+    resp := NewRequestBuilder().WithUrl(ts.URL).WithCheckRedirect(redirectPol).Build().Do()
 
     fmt.Printf("Body: %s \n\r", string(resp.Body()))
     fmt.Printf("Status: %s \n\r", resp.Response().Status)
