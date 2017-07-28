@@ -3,17 +3,20 @@ package request
 import (
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 type request struct {
 	request *http.Request
 	client  *http.Client
+	auth    AuthorizationMethod
 }
 
-func newRequest(req *http.Request, client *http.Client) Request {
+func newRequest(req *http.Request, client *http.Client, auth AuthorizationMethod) Request {
 	return &request{
 		request: req,
 		client:  client,
+		auth:    auth,
 	}
 }
 
@@ -26,13 +29,39 @@ func (r *request) getUnderlyingHttpClient() *http.Client {
 }
 
 func (r *request) Do() Response {
-	resp, err := r.client.Do(r.request)
+	// REMARKS: Delay auth configuration when set to Digest
+	if r.auth.getScheme() != AUTH_DIGEST {
+		r.auth.Configure(r.request)
+	}
 
-	defer resp.Body.Close()
+	resp, err := r.client.Do(r.request)
 
 	if err != nil {
 		panic(err)
 	}
+
+	// REMARKS: If we received a 401, check if we need to perform digest auth and resend the request.
+	if resp.StatusCode == http.StatusUnauthorized {
+
+		h := resp.Header.Get("WWW-Authenticate")
+
+		authParts := strings.Split(h, " ")
+
+		if len(authParts) > 0 && authParts[0] == "Digest" {
+			a, ok := r.auth.(*authDigest)
+			if ok {
+				a.setDigestParts(resp)
+				a.Configure(r.request)
+
+				// REMARKS: Digest authentication has been configured so resend the request.
+				if resp, err = r.client.Do(r.request); err != nil {
+					panic(err)
+				}
+			}
+		}
+	}
+
+	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 

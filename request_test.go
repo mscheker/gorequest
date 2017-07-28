@@ -149,6 +149,13 @@ func TestBasicAuthenticationWithRFC1738(t *testing.T) {
 	assert.Equal(t, http.StatusOK, r.Response().StatusCode, "Should equal HTTP Status 200 (OK)")
 }
 
+func TestDigestAuthentication(t *testing.T) {
+	r := NewRequestBuilder().WithMethod("GET").WithUrl("https://postman-echo.com/digest-auth").WithDigestAuth("postman", "password").Build().Do()
+
+	assert.NotNil(t, r, "Should not be nil")
+	assert.Equal(t, http.StatusOK, r.Response().StatusCode, "Should equal HTTP Status 200 (OK)")
+}
+
 func TestWithCheckRedirect(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 		resp.Header().Add("Location", POSTMAN_ECHO_GET_ENDPOINT)

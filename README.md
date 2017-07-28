@@ -22,6 +22,7 @@ $ go get github.com/mscheker/gorequest
 [Authentication](#authentication)
 * [Basic Authentication](#basic-authentication)
 * [Bearer Authentication](#bearer-authentication)
+* [Digest Authentication](#digest-authentication)
 
 [Redirect Policy](#redirect-policy)
 
@@ -78,6 +79,7 @@ When building a request, the only required option is the URL; the method will de
 * `WithJsonBody` - Body for POST and PUT requests. Must be a valid JSON formatted string or a JSON serializable struct. `Content-Type` header is set to `application/json`.
 * `WithBasicAuth` - Generates a Base64 encoded string from the `username` and `password` specified, and sets the `Authorization` header to `Basic <encoded_string>` accordingly.
 * `WithBearerAuth` - Sets the `Authorization` header to `Bearer <your_bearer_token>` accordingly.
+* `WithDigestAuth` - Generates the necessary MD5 hash and nonce values, and sets the hashed Digest `Authorization` header accordingly before resending the request.
 * `WithTimeout` - Sets the time limit for requests made by the HTTP client. Defaults to `30 seconds`.
 * `WithCheckRedirect` - Sets the policy for handling redirects by the HTTP client.
 * `Build` - Builds a request object with the specified options. Will panic if a `URL` has not been set.
@@ -90,9 +92,10 @@ Note: Body is ignored for GET, DELETE and HEAD requests.
 The builder exposes various methods for the different authentication mechanisms that are supported:
 * Basic
 * Bearer
+* Digest
 
 ### Basic Authentication
-Basic authentication is supported, and it is set when a `username` and `password` are provided as part of the `WithBasicAuth` method.
+Basic authentication is supported, and it is set when a `username` and `password` is provided as part of the `WithBasicAuth` method.
 ```go
 package main
 
@@ -140,6 +143,25 @@ import (
 
 func main() {
     resp := request.NewRequestBuilder().WithUrl("https://your_endpoint").WithBearerAuth("your_bearer_token").Build().Do()
+
+    fmt.Printf("Body: %s \n\r", string(resp.Body()))
+    fmt.Printf("Status: %s \n\r", resp.Response().Status)
+}
+```
+
+### Digest Authentication
+Digest authentication is supported, and it is set when a `username` and `password` is provided as part of the `WithDigestAuth` method. Upon detecting a `401 (Unauthorized)` in the initial response, the request is sent again with the hashed Digest Authorization header.
+```go
+package main
+
+import (
+    "fmt"
+
+    request "github.com/mscheker/gorequest"
+)
+
+func main() {
+    resp := request.NewRequestBuilder().WithMethod("GET").WithUrl("https://postman-echo.com/digest-auth").WithDigestAuth("postman", "password").Build().Do()
 
     fmt.Printf("Body: %s \n\r", string(resp.Body()))
     fmt.Printf("Status: %s \n\r", resp.Response().Status)
