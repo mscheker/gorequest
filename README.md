@@ -23,6 +23,8 @@ $ go get github.com/mscheker/gorequest
 * [Basic Authentication](#basic-authentication)
 * [Bearer Authentication](#bearer-authentication)
 
+[Redirect Policy](#redirect-policy)
+
 [Convenience Methods](#convenience-methods)
 
 [Credits](#credits)
@@ -77,6 +79,7 @@ When building a request, the only required option is the URL; the method will de
 * `WithBasicAuth` - Generates a Base64 encoded string from the `username` and `password` specified, and sets the `Authorization` header to `Basic <encoded_string>` accordingly.
 * `WithBearerAuth` - Sets the `Authorization` header to `Bearer <your_bearer_token>` accordingly.
 * `WithTimeout` - Sets the time limit for requests made by the HTTP client. Defaults to `30 seconds`.
+* `WithCheckRedirect` - Sets the policy for handling redirects by the HTTP client.
 * `Build` - Builds a request object with the specified options. Will panic if a `URL` has not been set.
 
 ```
@@ -137,6 +140,30 @@ import (
 
 func main() {
     resp := request.NewRequestBuilder().WithUrl("https://your_endpoint").WithBearerAuth("your_bearer_token").Build().Do()
+
+    fmt.Printf("Body: %s \n\r", string(resp.Body()))
+    fmt.Printf("Status: %s \n\r", resp.Response().Status)
+}
+```
+
+## Redirect Policy
+```go
+package main
+
+import (
+    "fmt"
+
+    request "github.com/mscheker/gorequest"
+)
+
+func main() {
+    redirectPol := func(req *http.Request, via []*http.Request) error {
+        // Your code here...
+
+        return nil
+    }
+
+    resp := NewRequestBuilder().WithUrl("https://postman-echo.com/get").WithCheckRedirect(redirectPol).Build().Do()
 
     fmt.Printf("Body: %s \n\r", string(resp.Body()))
     fmt.Printf("Status: %s \n\r", resp.Response().Status)
