@@ -50,6 +50,7 @@ type RequestBuilder interface {
 	WithBearerAuth(token string) RequestBuilder
 	WithDigestAuth(username, password string) RequestBuilder
 	WithTimeout(timeout time.Duration) RequestBuilder
+	WithCheckRedirect(checkRedirect func(req *http.Request, via []*http.Request) error) RequestBuilder
 }
 
 type RequestBuilderConstructor func() RequestBuilder

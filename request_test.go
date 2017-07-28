@@ -155,3 +155,26 @@ func TestDigestAuthentication(t *testing.T) {
 	assert.NotNil(t, r, "Should not be nil")
 	assert.Equal(t, http.StatusOK, r.Response().StatusCode, "Should equal HTTP Status 200 (OK)")
 }
+
+func TestWithCheckRedirect(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+		resp.Header().Add("Location", POSTMAN_ECHO_GET_ENDPOINT)
+		resp.WriteHeader(http.StatusMovedPermanently)
+
+		fmt.Fprintf(resp, "")
+	}))
+	defer ts.Close()
+
+	redirectPol := func(req *http.Request, via []*http.Request) error {
+		assert.Equal(t, "I am going to be redirected", via[0].Header.Get("TestHeader"), "Should equal request header")
+
+		return nil
+	}
+
+	b := NewRequestBuilder().WithUrl(ts.URL).WithCheckRedirect(redirectPol)
+	r := b.WithHeader("TestHeader", "I am going to be redirected").Build().Do()
+
+	assert.NotNil(t, r, "Should not be nil")
+	assert.Equal(t, http.StatusOK, r.Response().StatusCode, "Should equal HTTP Status 200 (OK)")
+	assert.Equal(t, POSTMAN_ECHO_GET_ENDPOINT, r.Response().Request.URL.String(), "Should equal redirect URL")
+}

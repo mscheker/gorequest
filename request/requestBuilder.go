@@ -12,12 +12,13 @@ import (
 // TODO: Document
 
 type requestBuilder struct {
-	auth    AuthorizationMethod
-	body    RequestBody
-	headers map[string]string
-	method  string
-	url     string
-	timeout time.Duration
+	auth          AuthorizationMethod
+	body          RequestBody
+	headers       map[string]string
+	method        string
+	url           string
+	timeout       time.Duration
+	checkRedirect func(req *http.Request, via []*http.Request) error
 }
 
 func (b *requestBuilder) WithUrl(url string) RequestBuilder {
@@ -88,6 +89,12 @@ func (b *requestBuilder) WithTimeout(timeout time.Duration) RequestBuilder {
 	return b
 }
 
+func (b *requestBuilder) WithCheckRedirect(checkRedirect func(req *http.Request, via []*http.Request) error) RequestBuilder {
+	b.checkRedirect = checkRedirect
+
+	return b
+}
+
 func (b *requestBuilder) Build() Request {
 	b.validate()
 
@@ -114,6 +121,10 @@ func (b *requestBuilder) Build() Request {
 
 	// REMARKS: Initialize HTTP Client
 	client := newHttpClient(b.timeout)
+
+	if b.checkRedirect != nil {
+		client.CheckRedirect = b.checkRedirect
+	}
 
 	return newRequest(req, client, b.auth)
 }
